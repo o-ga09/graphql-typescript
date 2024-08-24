@@ -35,4 +35,4 @@ Set up GraphQL Code
 
 See [index.ts](src/index.ts)
 
-LICENCE @o-ga09
+LICENSE @o-ga09
