@@ -131,6 +131,7 @@ $ npm install -D prettier
 ```
 
 See [config file](./.prettierrc)
+
 See [config file](./.prettierignore)
 
 vscode setting
