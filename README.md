@@ -92,4 +92,34 @@ add package.json
 $ npm run dev
 ```
 
+## Install Vitest
+
+Install
+
+```bash
+$ npm install -D vitest
+```
+
+add package.json script
+
+```json
+"test": "vitest",
+```
+
+## Install Linter
+
+Install
+
+```bash
+$ npm install -D eslint
+```
+
+See eslint [config file](./eslint.config.js)
+
+add package.json script
+
+```json
+"lint": "eslint . -c eslint.config.js --report-unused-disable-directives --max-warnings 0",
+```
+
 LICENSE @o-ga09

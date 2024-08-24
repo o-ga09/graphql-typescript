@@ -8,7 +8,8 @@
     "start": "npm run transpile && node dist/app.js",
     "dev": "nodemon --watch 'src/**/*.ts' --exec 'tsx' src/app.ts",
     "generate:server": "npx graphql-codegen",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint . -c eslint.config.js --report-unused-disable-directives --max-warnings 0",
+    "test": "vitest",
     "codegen": "graphql-codegen --config codegen.ts"
   },
   "keywords": [],
@@ -29,8 +30,12 @@
     "@graphql-codegen/typescript-document-nodes": "4.0.9",
     "@graphql-codegen/typescript-resolvers": "4.2.1",
     "@types/node": "^20.12.0",
+    "eslint": "^9.9.1",
+    "globals": "^15.9.0",
     "nodemon": "^3.1.4",
     "tsx": "^4.17.0",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^8.2.0",
+    "vitest": "^2.0.5"
   }
 }
