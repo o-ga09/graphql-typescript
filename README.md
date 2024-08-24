@@ -23,9 +23,21 @@ $ mkdir graphql-typescript
 $ cd graphql-typescript
 $ touch src/index.ts
 $ npm init --yes && npm pkg set type="module"
+$ npx tsc --init
 $ npm install @apollo/server@4.10.4 graphql@16.8.2 @graphql-tools/graphql-file-loader@8.0.1 @graphql-tools/l
 oad@8.0.2 @graphql-tools/schema@10.0.4
+$ npm install tsx
 ```
+
+Set up hot reload 
+
+Install nopdemon
+
+```bash
+$ npm install -D nodemon
+```
+
+See nodemon [config file](./nodemon.json)
 
 Set up GraphQL Schema
 
@@ -34,5 +46,50 @@ See [schema.graphql](./schema.graphql)
 Set up GraphQL Code
 
 See [index.ts](src/index.ts)
+
+Set up GraphQL Server Generator
+
+```bash
+$ npm install -D @graphql-codegen/cli 
+$ npm install -D @graphql-codegen/typescript 
+$ npm install -D @graphql-codegen/typescript-resolvers
+```
+
+Generate GraphQL Init
+
+```bash
+$ npx graphql-code-generator init
+? What type of application are you building? Backend - API or server
+? Where is your schema?: (path or url) schema.graphql
+? Pick plugins: TypeScript (required by other typescript plugins), TypeScript Resolvers (strongly typed resolve functions), TypeScript GraphQL document 
+nodes (embedded GraphQL document)
+? Where to write the output: src/generated/graphql.ts
+? Do you want to generate an introspection file? Yes
+? How to name the config file? codegen.ts
+? What script in package.json should run the codegen? codegen
+Fetching latest versions of selected plugins...
+```
+
+Generate GraphQL Code
+
+```bash
+$ npm install
+$ npm run codegen
+```
+
+See [generated code](./generated/types.ts)
+this file is DO NOT EDIT
+
+Run GraphQL Server
+
+add package.json
+
+```json
+"dev": "nodemon --watch 'src/**/*.ts' --exec 'tsx' src/app.ts",
+```
+
+```bash
+$ npm run dev
+```
 
 LICENSE @o-ga09

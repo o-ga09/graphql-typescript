@@ -5,8 +5,11 @@
   "main": "index.js",
   "scripts": {
     "transpile": "tsc",
-    "start": "npm run transpile && node dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npm run transpile && node dist/app.js",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'tsx' src/app.ts",
+    "generate:server": "npx graphql-codegen",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "codegen": "graphql-codegen --config codegen.ts"
   },
   "keywords": [],
   "author": "",
@@ -20,7 +23,14 @@
     "graphql": "^16.8.2"
   },
   "devDependencies": {
-    "@types/node": "^20.14.9",
+    "@graphql-codegen/cli": "5.0.2",
+    "@graphql-codegen/introspection": "4.0.3",
+    "@graphql-codegen/typescript": "4.0.9",
+    "@graphql-codegen/typescript-document-nodes": "4.0.9",
+    "@graphql-codegen/typescript-resolvers": "4.2.1",
+    "@types/node": "^20.12.0",
+    "nodemon": "^3.1.4",
+    "tsx": "^4.17.0",
     "typescript": "^5.5.3"
   }
 }
