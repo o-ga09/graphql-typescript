@@ -1,0 +1,34 @@
+type PostTag {
+  name: String!
+}
+
+type Note {
+  id: ID!
+  title: String!
+  content: String!
+  tags: [PostTag!]!
+}
+
+interface User {
+  name: String!
+}
+
+type Author implements User {
+  id: ID!
+  name: String!
+  posts: [Note!]!
+}
+
+type Query {
+  authors: [Author!]!
+  authorById(id: ID!): Author
+}
+
+type Nutation {
+  createNote(title: String!, content: String!, tags: [String!]!): Note
+  updateNote(id: ID!, title: String, content: String, tags: [String!]): Note
+  deleteNote(id: ID!): Note
+  createAuthor(name: String!): Author
+  updateAuthor(id: ID!, name: String): Author
+  deleteAuthor(id: ID!): Author
+}

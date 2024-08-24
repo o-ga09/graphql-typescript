@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "rootDirs": ["src"],
+        "outDir": "dist",
+        "lib": ["es2015"],
+        "target": "es2020",
+        "module": "esnext",
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}
