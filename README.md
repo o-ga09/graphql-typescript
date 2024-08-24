@@ -122,4 +122,24 @@ add package.json script
 "lint": "eslint . -c eslint.config.js --report-unused-disable-directives --max-warnings 0",
 ```
 
+## Install Code Formatter
+
+Install prettier
+
+```bash
+$ npm install -D prettier
+```
+
+See [config file](./.prettierrc)
+See [config file](./.prettierignore)
+
+vscode setting
+
+```json
+{
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+}
+```
+
 LICENSE @o-ga09
