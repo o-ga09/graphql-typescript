@@ -143,4 +143,11 @@ vscode setting
 }
 ```
 
+add package.json script
+
+```json
+"format": "npx prettier . --check",
+"format:fix": "npx prettier --write .",
+```
+
 LICENSE @o-ga09
