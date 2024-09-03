@@ -23,11 +23,6 @@ describe('getUserList', async () => {
 			throw new Error('MySQL container failed to start');
 		}
 		console.log('MySQL container started');
-		process.env.MYSQL_HOST = container.getHost();
-		process.env.MYSQL_PORT = container.getMappedPort(3306).toString();
-		process.env.MYSQL_USER = 'user';
-		process.env.MYSQL_PASSWORD = 'password';
-		process.env.MYSQL_DATABASE = 'testdb';
 	});
 
 	afterAll(async () => {
