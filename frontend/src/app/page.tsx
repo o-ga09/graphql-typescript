@@ -19,7 +19,7 @@ export default function Home() {
         </p>
         <div className="flex justify-center gap-4">
           <Button size="lg">
-            Get Started
+            <Link href="/get-started">Get Started</Link>
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
           <Button size="lg" variant="outline">
@@ -81,7 +81,7 @@ export default function Home() {
             experience today.
           </p>
           <Button size="lg" variant="secondary">
-            Sign Up Now
+            <Link href="/login">Sign Up Now</Link>
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </div>
