@@ -3,17 +3,8 @@ import { GetUserRow, getUsers, getUser, updateUser, createUser, deleteUser } fro
 
 export class UserDao {
 	private connection: mysql.Connection;
-	constructor() {
-		this.initializeConnection();
-	}
-
-	async initializeConnection() {
-		this.connection = await mysql.createConnection({
-			host: process.env.MYSQL_HOST,
-			user: process.env.MYSQL_USER,
-			password: process.env.MYSQL_PASSWORD,
-			database: process.env.MYSQL_DATABASE,
-		});
+	constructor(connection: mysql.Connection) {
+		this.connection = connection;
 	}
 
 	async getUserList(): Promise<GetUserRow[]> {

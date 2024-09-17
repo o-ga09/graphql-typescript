@@ -170,7 +170,7 @@ export async function createUser(client: Client, args: CreateUserArgs): Promise<
 
 export const getUserQuery = `-- name: GetUser :one
 SELECT 
-    id
+    id,
     user_id,
     name,
     email,
@@ -188,7 +188,8 @@ export interface GetUserArgs {
 }
 
 export interface GetUserRow {
-    userId: number;
+    id: number;
+    userId: string;
     name: string;
     email: string;
     address: string;
@@ -210,21 +211,22 @@ export async function getUser(client: Client, args: GetUserArgs): Promise<GetUse
     }
     const row = rows[0];
     return {
-        userId: row[0],
-        name: row[1],
-        email: row[2],
-        address: row[3],
-        password: row[4],
-        sex: row[5],
-        birthday: row[6],
-        createdAt: row[7],
-        updatedAt: row[8]
+        id: row[0],
+        userId: row[1],
+        name: row[2],
+        email: row[3],
+        address: row[4],
+        password: row[5],
+        sex: row[6],
+        birthday: row[7],
+        createdAt: row[8],
+        updatedAt: row[9]
     };
 }
 
 export const getUsersQuery = `-- name: GetUsers :many
 SELECT 
-    id
+    id,
     user_id,
     name,
     email,
@@ -238,7 +240,8 @@ FROM users
 ORDER BY created_at DESC`;
 
 export interface GetUsersRow {
-    userId: number;
+    id: number;
+    userId: string;
     name: string;
     email: string;
     address: string;
@@ -257,15 +260,16 @@ export async function getUsers(client: Client): Promise<GetUsersRow[]> {
     });
     return rows.map(row => {
         return {
-            userId: row[0],
-            name: row[1],
-            email: row[2],
-            address: row[3],
-            password: row[4],
-            sex: row[5],
-            birthday: row[6],
-            createdAt: row[7],
-            updatedAt: row[8]
+            id: row[0],
+            userId: row[1],
+            name: row[2],
+            email: row[3],
+            address: row[4],
+            password: row[5],
+            sex: row[6],
+            birthday: row[7],
+            createdAt: row[8],
+            updatedAt: row[9]
         };
     });
 }

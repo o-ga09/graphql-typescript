@@ -42,7 +42,7 @@ INSERT INTO users (
 
 -- name: GetUser :one
 SELECT 
-    id
+    id,
     user_id,
     name,
     email,
@@ -57,7 +57,7 @@ WHERE user_id = ? LIMIT 1;
 
 -- name: GetUsers :many
 SELECT 
-    id
+    id,
     user_id,
     name,
     email,
