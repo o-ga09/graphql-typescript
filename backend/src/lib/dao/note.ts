@@ -1,5 +1,13 @@
 // mysql２でに接続するコード書く
-import { createNote, deleteNote, getNote, GetNoteRow, getNotes, updateNote } from '@/generated/driver/query_sql';
+import {
+	createNote,
+	createUserNote,
+	deleteNote,
+	getNote,
+	GetNoteRow,
+	getNotes,
+	updateNote,
+} from '@/generated/driver/query_sql';
 import mysql from 'mysql2/promise';
 
 export class NoteDao {
@@ -33,7 +41,13 @@ export class NoteDao {
 		}
 	}
 
-	async createNote(param: { noteId: string; title: string; tags: string; content: string }): Promise<void> {
+	async createNote(param: {
+		noteId: string;
+		title: string;
+		tags: string;
+		content: string;
+		userId: string;
+	}): Promise<void> {
 		try {
 			await createNote(this.connection, {
 				noteId: param.noteId,
@@ -41,6 +55,7 @@ export class NoteDao {
 				tags: param.tags,
 				content: param.content,
 			});
+			await createUserNote(this.connection, { noteId: param.noteId, userId: param.userId });
 		} catch (e) {
 			console.error(e);
 			throw new Error('登録に失敗しました');

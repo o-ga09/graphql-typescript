@@ -3,9 +3,9 @@ import mysql, { RowDataPacket } from "mysql2/promise";
 type Client = mysql.Connection | mysql.Pool;
 
 export const getNoteQuery = `-- name: GetNote :one
-SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id, user_notes.note_id FROM notes
+SELECT id, notes.note_id, title, tags, content, created_at, updated_at FROM notes
 JOIN user_notes ON notes.note_id = user_notes.note_id
-WHERE user_notes.note_id = ? LIMIT 1`;
+WHERE user_notes.note_id = ? AND notes.deleted_at IS NULL LIMIT 1`;
 
 export interface GetNoteArgs {
     noteId: string;
@@ -19,8 +19,6 @@ export interface GetNoteRow {
     content: string;
     createdAt: Date | null;
     updatedAt: Date | null;
-    userId: string;
-    noteId_2: string;
 }
 
 export async function getNote(client: Client, args: GetNoteArgs): Promise<GetNoteRow | null> {
@@ -40,16 +38,14 @@ export async function getNote(client: Client, args: GetNoteArgs): Promise<GetNot
         tags: row[3],
         content: row[4],
         createdAt: row[5],
-        updatedAt: row[6],
-        userId: row[7],
-        noteId_2: row[8]
+        updatedAt: row[6]
     };
 }
 
 export const getNotesQuery = `-- name: GetNotes :many
-SELECT id, notes.note_id, title, tags, content, created_at, updated_at, user_id, user_notes.note_id FROM notes
+SELECT id, notes.note_id, title, tags, content, created_at, updated_at FROM notes
 JOIN user_notes ON notes.note_id = user_notes.note_id
-WHERE user_notes.user_id = ?
+WHERE user_notes.user_id = ? AND notes.deleted_at IS NULL
 ORDER BY created_at DESC`;
 
 export interface GetNotesArgs {
@@ -64,8 +60,6 @@ export interface GetNotesRow {
     content: string;
     createdAt: Date | null;
     updatedAt: Date | null;
-    userId: string;
-    noteId_2: string;
 }
 
 export async function getNotes(client: Client, args: GetNotesArgs): Promise<GetNotesRow[]> {
@@ -82,9 +76,7 @@ export async function getNotes(client: Client, args: GetNotesArgs): Promise<GetN
             tags: row[3],
             content: row[4],
             createdAt: row[5],
-            updatedAt: row[6],
-            userId: row[7],
-            noteId_2: row[8]
+            updatedAt: row[6]
         };
     });
 }
@@ -133,7 +125,8 @@ export async function updateNote(client: Client, args: UpdateNoteArgs): Promise<
 }
 
 export const deleteNoteQuery = `-- name: DeleteNote :exec
-DELETE FROM notes
+UPDATE notes
+SET deleted_at = NOW()
 WHERE note_id = ?`;
 
 export interface DeleteNoteArgs {
@@ -176,7 +169,18 @@ export async function createUser(client: Client, args: CreateUserArgs): Promise<
 }
 
 export const getUserQuery = `-- name: GetUser :one
-SELECT id, user_id, name, address, email, password, sex, birthday, created_at, updated_at FROM users
+SELECT 
+    id
+    user_id,
+    name,
+    email,
+    address,
+    password,
+    sex,
+    birthday,
+    created_at,
+    updated_at
+FROM users
 WHERE user_id = ? LIMIT 1`;
 
 export interface GetUserArgs {
@@ -184,11 +188,10 @@ export interface GetUserArgs {
 }
 
 export interface GetUserRow {
-    id: number;
-    userId: string;
+    userId: number;
     name: string;
-    address: string;
     email: string;
+    address: string;
     password: string;
     sex: number;
     birthday: string;
@@ -207,29 +210,38 @@ export async function getUser(client: Client, args: GetUserArgs): Promise<GetUse
     }
     const row = rows[0];
     return {
-        id: row[0],
-        userId: row[1],
-        name: row[2],
+        userId: row[0],
+        name: row[1],
+        email: row[2],
         address: row[3],
-        email: row[4],
-        password: row[5],
-        sex: row[6],
-        birthday: row[7],
-        createdAt: row[8],
-        updatedAt: row[9]
+        password: row[4],
+        sex: row[5],
+        birthday: row[6],
+        createdAt: row[7],
+        updatedAt: row[8]
     };
 }
 
 export const getUsersQuery = `-- name: GetUsers :many
-SELECT id, user_id, name, address, email, password, sex, birthday, created_at, updated_at FROM users
+SELECT 
+    id
+    user_id,
+    name,
+    email,
+    address,
+    password,
+    sex,
+    birthday,
+    created_at,
+    updated_at
+FROM users
 ORDER BY created_at DESC`;
 
 export interface GetUsersRow {
-    id: number;
-    userId: string;
+    userId: number;
     name: string;
-    address: string;
     email: string;
+    address: string;
     password: string;
     sex: number;
     birthday: string;
@@ -245,16 +257,15 @@ export async function getUsers(client: Client): Promise<GetUsersRow[]> {
     });
     return rows.map(row => {
         return {
-            id: row[0],
-            userId: row[1],
-            name: row[2],
+            userId: row[0],
+            name: row[1],
+            email: row[2],
             address: row[3],
-            email: row[4],
-            password: row[5],
-            sex: row[6],
-            birthday: row[7],
-            createdAt: row[8],
-            updatedAt: row[9]
+            password: row[4],
+            sex: row[5],
+            birthday: row[6],
+            createdAt: row[7],
+            updatedAt: row[8]
         };
     });
 }
@@ -298,6 +309,24 @@ export async function deleteUser(client: Client, args: DeleteUserArgs): Promise<
     await client.query({
         sql: deleteUserQuery,
         values: [args.userId]
+    });
+}
+
+export const createUserNoteQuery = `-- name: CreateUserNote :exec
+INSERT INTO user_notes (
+    user_id,
+    note_id
+) VALUES (?, ?)`;
+
+export interface CreateUserNoteArgs {
+    userId: string;
+    noteId: string;
+}
+
+export async function createUserNote(client: Client, args: CreateUserNoteArgs): Promise<void> {
+    await client.query({
+        sql: createUserNoteQuery,
+        values: [args.userId, args.noteId]
     });
 }
 
