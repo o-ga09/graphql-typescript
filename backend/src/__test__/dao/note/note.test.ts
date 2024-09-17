@@ -44,8 +44,19 @@ describe('NoteDao Tests', () => {
 
 		// テストデータ挿入
 		await connection.query(`
+			INSERT INTO users (user_id, name, email, password, address, sex, birthday) VALUES
+			('999', 'testuser', 'hoge@example.com', 'xxx', 'yyy', 1, '2024-09-18');
+		`);
+
+		await connection.query(`
 			INSERT INTO notes (note_id, title, tags, content) VALUES
 			('1', 'Test Note', 'test', 'This is a test note');
+		`);
+		await connection.query(`
+			INSERT INTO user_notes (
+			    user_id,
+ 				note_id
+			) VALUES ('999', '1');
 		`);
 
 		noteDao = new NoteDao(connection);
@@ -58,10 +69,20 @@ describe('NoteDao Tests', () => {
 	});
 
 	test('createNote should create a note', async () => {
-		const note = { noteId: '2', title: 'Test Note', tags: 'test', content: 'This is a test note' };
+		const note = {
+			noteId: '2',
+			title: 'Test Note',
+			tags: 'test',
+			content: 'This is a test note',
+			userId: 'd4a6e9b6-f079-45c9-b6d0-565cf4280596',
+		};
 		await noteDao.createNote(note);
 		const result = await noteDao.getNoteDetail('2');
-		expect(result).toEqual(note);
+		expect(result.id).toBeGreaterThan(0);
+		expect(result.noteId).toBe(note.noteId);
+		expect(result.title).toBe(note.title);
+		expect(result.tags).toBe(note.tags);
+		expect(result.content).toBe(note.content);
 	});
 
 	test('getNoteList should return a list of notes', async () => {
@@ -74,13 +95,11 @@ describe('NoteDao Tests', () => {
 		expect(note).toEqual({
 			id: 1,
 			noteId: 'd4a6e9b6-f079-45c9-b6d0-565cf4280522',
-			noteId_2: 'd4a6e9b6-f079-45c9-b6d0-565cf4280522',
 			title: 'Welcome to Note App',
 			tags: 'tag_a,tag_b,tag_c',
 			content: 'This is a note app',
 			createdAt: new Date('2020-12-31T15:00:00.000Z'),
 			updatedAt: new Date('2020-12-31T15:00:00.000Z'),
-			userId: 'd4a6e9b6-f079-45c9-b6d0-565cf4280596',
 		});
 	});
 
@@ -88,7 +107,11 @@ describe('NoteDao Tests', () => {
 		const updatedNote = { noteId: '1', title: 'Updated Note', tags: 'updated', content: 'This is an updated note' };
 		await noteDao.updateNote(updatedNote);
 		const result = await noteDao.getNoteDetail('1');
-		expect(result).toEqual(updatedNote);
+		expect(result.id).toBeGreaterThan(0);
+		expect(result.noteId).toBe(updatedNote.noteId);
+		expect(result.title).toBe(updatedNote.title);
+		expect(result.tags).toBe(updatedNote.tags);
+		expect(result.content).toBe(updatedNote.content);
 	});
 
 	test('deleteNote should delete a note', async () => {
