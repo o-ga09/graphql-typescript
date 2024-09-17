@@ -15,6 +15,7 @@ describe('UserDao Tests', () => {
 				MYSQL_DATABASE: 'testdb',
 				MYSQL_USER: 'user',
 				MYSQL_PASSWORD: 'pass',
+				TZ: 'Asia/Tokyo',
 			})
 			.withBindMounts([
 				{
