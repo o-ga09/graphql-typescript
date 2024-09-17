@@ -16,3 +16,7 @@ codegen.ts
 .prettierignore
 .gitignore
 .github/workflows/
+db/
+compose.yml
+.DS_Store
+.env
