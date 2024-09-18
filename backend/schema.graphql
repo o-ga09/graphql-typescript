@@ -24,7 +24,7 @@ type Query {
   authorById(id: ID!): Author
 }
 
-type Nutation {
+type Mutation {
   createNote(title: String!, content: String!, tags: [String!]!): Note
   updateNote(id: ID!, title: String, content: String, tags: [String!]): Note
   deleteNote(id: ID!): Note
