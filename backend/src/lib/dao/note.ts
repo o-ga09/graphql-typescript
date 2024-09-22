@@ -42,7 +42,7 @@ export class NoteDao {
 		}
 	}
 
-	async createNote(param: { title: string; tags: string; content: string; userId: string }): Promise<void> {
+	async createNote(param: { title: string; tags: string; content: string; userId: string }): Promise<string> {
 		try {
 			const noteid = generateUlid();
 			await createNote(this.connection, {
@@ -52,6 +52,7 @@ export class NoteDao {
 				content: param.content,
 			});
 			await createUserNote(this.connection, { noteId: noteid, userId: param.userId });
+			return noteid;
 		} catch (e) {
 			console.error(e);
 			throw new Error('登録に失敗しました');
