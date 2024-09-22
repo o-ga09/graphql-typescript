@@ -23,7 +23,8 @@
     "@graphql-tools/graphql-file-loader": "^8.0.1",
     "@graphql-tools/load": "^8.0.2",
     "@graphql-tools/schema": "^10.0.4",
-    "graphql": "^16.8.2"
+    "graphql": "^16.8.2",
+    "ulid": "^2.3.0"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "5.0.2",
@@ -32,11 +33,13 @@
     "@graphql-codegen/typescript-document-nodes": "4.0.9",
     "@graphql-codegen/typescript-resolvers": "4.2.1",
     "@types/node": "^20.12.0",
+    "@types/supertest": "^6.0.2",
     "eslint": "^9.9.1",
     "globals": "^15.9.0",
     "mysql2": "^3.11.3",
     "nodemon": "^3.1.4",
     "prettier": "^3.3.3",
+    "supertest": "^7.0.0",
     "testcontainers": "^10.11.0",
     "tsx": "^4.17.0",
     "typescript": "^5.5.3",

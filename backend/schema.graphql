@@ -25,7 +25,7 @@ type Query {
 }
 
 type Mutation {
-  createNote(title: String!, content: String!, tags: [String!]!): Note
+  createNote(title: String!, content: String!, tags: [String!]!, userId: String!): Note
   updateNote(id: ID!, title: String, content: String, tags: [String!]): Note
   deleteNote(id: ID!): Note
   createAuthor(name: String!): Author

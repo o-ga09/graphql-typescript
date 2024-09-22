@@ -9,6 +9,7 @@ import {
 	updateNote,
 } from '@/generated/driver/query_sql';
 import mysql from 'mysql2/promise';
+import { generateUlid } from '../generateID/generateid';
 
 export class NoteDao {
 	private connection: mysql.Connection;
@@ -41,21 +42,16 @@ export class NoteDao {
 		}
 	}
 
-	async createNote(param: {
-		noteId: string;
-		title: string;
-		tags: string;
-		content: string;
-		userId: string;
-	}): Promise<void> {
+	async createNote(param: { title: string; tags: string; content: string; userId: string }): Promise<void> {
 		try {
+			const noteid = generateUlid();
 			await createNote(this.connection, {
-				noteId: param.noteId,
+				noteId: noteid,
 				title: param.title,
 				tags: param.tags,
 				content: param.content,
 			});
-			await createUserNote(this.connection, { noteId: param.noteId, userId: param.userId });
+			await createUserNote(this.connection, { noteId: noteid, userId: param.userId });
 		} catch (e) {
 			console.error(e);
 			throw new Error('登録に失敗しました');
