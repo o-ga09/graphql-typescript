@@ -20,11 +20,11 @@ describe('UserDao Tests', () => {
 			.withBindMounts([
 				{
 					target: '/docker-entrypoint-initdb.d',
-					source: path.resolve(__dirname, '../../../../db/mysql/init'),
+					source: path.resolve(__dirname, '../../../db/mysql/init'),
 				},
 				{
 					target: '/etc/mysql/conf.d/my.cnf',
-					source: path.resolve(__dirname, '../../../../db/mysql/conf.d/my.cnf'),
+					source: path.resolve(__dirname, '../../../db/mysql/conf.d/my.cnf'),
 				},
 			])
 			.withExposedPorts(3306)

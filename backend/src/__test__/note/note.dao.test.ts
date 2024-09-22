@@ -20,11 +20,11 @@ describe('NoteDao Tests', () => {
 			.withBindMounts([
 				{
 					target: '/docker-entrypoint-initdb.d',
-					source: path.resolve(__dirname, '../../../../db/mysql/init'),
+					source: path.resolve(__dirname, '../../../db/mysql/init'),
 				},
 				{
 					target: '/etc/mysql/conf.d/my.cnf',
-					source: path.resolve(__dirname, '../../../../db/mysql/conf.d/my.cnf'),
+					source: path.resolve(__dirname, '../../../db/mysql/conf.d/my.cnf'),
 				},
 			])
 			.withExposedPorts(3306)
@@ -71,16 +71,14 @@ describe('NoteDao Tests', () => {
 
 	test('createNote should create a note', async () => {
 		const note = {
-			noteId: '2',
 			title: 'Test Note',
 			tags: 'test',
 			content: 'This is a test note',
 			userId: 'd4a6e9b6-f079-45c9-b6d0-565cf4280596',
 		};
-		await noteDao.createNote(note);
-		const result = await noteDao.getNoteDetail('2');
-		expect(result.id).toBeGreaterThan(0);
-		expect(result.noteId).toBe(note.noteId);
+		const newNoteId = await noteDao.createNote(note);
+		const result = await noteDao.getNoteDetail(newNoteId);
+		expect(result.noteId).toBe(newNoteId);
 		expect(result.title).toBe(note.title);
 		expect(result.tags).toBe(note.tags);
 		expect(result.content).toBe(note.content);
