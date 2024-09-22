@@ -24,7 +24,8 @@
     "@graphql-tools/load": "^8.0.2",
     "@graphql-tools/schema": "^10.0.4",
     "graphql": "^16.8.2",
-    "ulid": "^2.3.0"
+    "ulid": "^2.3.0",
+    "winston": "^3.14.2"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "5.0.2",

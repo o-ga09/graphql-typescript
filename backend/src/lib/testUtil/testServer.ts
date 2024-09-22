@@ -5,7 +5,7 @@ import express from 'express';
 import { expressMiddleware } from '@apollo/server/express4';
 import http from 'http';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-import { createTestdbConnection } from '@/db';
+import { createTestdbConnection, dbconnection } from '@/db';
 import { NoteDao } from '../dao/note';
 import cors from 'cors';
 
@@ -27,8 +27,8 @@ export const createTestServer = async (param: { host; user; port; password; dbna
 		express.json(),
 		expressMiddleware(server, {
 			context: async () => {
-				const dbConnection = await createTestdbConnection(param);
-				const noteDao = new NoteDao(dbConnection);
+				await createTestdbConnection(param);
+				const noteDao = new NoteDao(dbconnection);
 				return { noteDao };
 			},
 		})

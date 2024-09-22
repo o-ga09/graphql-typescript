@@ -1,4 +1,6 @@
-import { createPool } from 'mysql2/promise';
+import { createPool, PoolConnection } from 'mysql2/promise';
+
+export let dbconnection: PoolConnection;
 
 // Create a MySQL connection
 export const createConnection = async () => {
@@ -23,5 +25,10 @@ export const createTestdbConnection = async (param: { host; user; port; password
 		database: param.dbname,
 	});
 
-	return await pool.getConnection();
+	dbconnection = await pool.getConnection();
+};
+
+// Close the MySQL connection
+export const closeConnection = async (connection) => {
+	connection.release();
 };
