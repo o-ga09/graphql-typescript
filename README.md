@@ -29,7 +29,7 @@ oad@8.0.2 @graphql-tools/schema@10.0.4
 $ npm install tsx
 ```
 
-Set up hot reload 
+Set up hot reload
 
 Install nopdemon
 
@@ -50,8 +50,8 @@ See [index.ts](src/index.ts)
 Set up GraphQL Server Generator
 
 ```bash
-$ npm install -D @graphql-codegen/cli 
-$ npm install -D @graphql-codegen/typescript 
+$ npm install -D @graphql-codegen/cli
+$ npm install -D @graphql-codegen/typescript
 $ npm install -D @graphql-codegen/typescript-resolvers
 ```
 
@@ -61,7 +61,7 @@ Generate GraphQL Init
 $ npx graphql-code-generator init
 ? What type of application are you building? Backend - API or server
 ? Where is your schema?: (path or url) schema.graphql
-? Pick plugins: TypeScript (required by other typescript plugins), TypeScript Resolvers (strongly typed resolve functions), TypeScript GraphQL document 
+? Pick plugins: TypeScript (required by other typescript plugins), TypeScript Resolvers (strongly typed resolve functions), TypeScript GraphQL document
 nodes (embedded GraphQL document)
 ? Where to write the output: src/generated/graphql.ts
 ? Do you want to generate an introspection file? Yes
@@ -138,8 +138,8 @@ vscode setting
 
 ```json
 {
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
 }
 ```
 
@@ -149,5 +149,51 @@ add package.json script
 "format": "npx prettier . --check",
 "format:fix": "npx prettier --write .",
 ```
+
+## GitHub と Google Cloud の OIDC 認証
+
+```bash
+# サービスアカウントの作成
+gcloud iam service-accounts create github-actions-sa \
+  --display-name="GitHub Actions Service Account"
+
+# サービスアカウントに必要なロールを付与
+gcloud projects add-iam-policy-binding <PROJECT_ID> \
+  --member="serviceAccount:githubactions@<PROJECT_ID>.iam.gserviceaccount.com" \
+  --role="roles/run.admin"
+
+gcloud projects add-iam-policy-binding <PROJECT_ID> \
+  --member="serviceAccount:githubactions@<PROJECT_ID>.iam.gserviceaccount.com" \
+  --role="roles/iam.serviceAccountUser"
+
+# Workload Identity Poolの作成
+gcloud iam workload-identity-pools create "github-actions-pool" \
+  --project="<PROJECT_ID>" \
+  --location="global" \
+  --display-name="GitHub Actions Pool"
+
+# Workload Identity Providerの作成
+gcloud iam workload-identity-pools providers create-oidc "github-actions-provider" \
+  --project="<PROJECT_ID>" \
+  --location="global" \
+  --workload-identity-pool="github-actions-pool" \
+  --display-name="GitHub Actions Provider" \
+  --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository" \
+  --attribute-condition="assertion.repository=='<github owner>/<github repo>'" \
+  --issuer-uri="https://token.actions.githubusercontent.com"
+
+# サービスアカウントへのバインディング
+gcloud iam service-accounts add-iam-policy-binding "githubactions@<PROJECT_ID>.iam.gserviceaccount.com" \
+  --project="<PROJECT_ID>" \
+  --role="roles/iam.workloadIdentityUser" \
+  --member="principalSet://iam.googleapis.com/projects/<PROJECT_ID>/locations/global/workloadIdentityPools/github-actions-pool/attribute.repository/<github owner>/<github repo>"
+
+# GitHub Actionsに必要なシークレットの設定
+
+```
+
+## 参考
+
+https://cloud.google.com/iam/docs/workload-identity-federation-with-deployment-pipelines?hl=ja#gcloud
 
 LICENSE @o-ga09
