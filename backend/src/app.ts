@@ -39,6 +39,27 @@ app.use(
 	})
 );
 
+app.get('/', (req, res) => {
+	res.status(200).json({ message: 'Hello World!' });
+});
+
+app.get('/health_check', (req, res) => {
+	res.status(200).json({ message: 'healthy' });
+});
+
+app.get('/health_check/db', async (req, res) => {
+	try {
+		const conn = createConnection();
+		(await conn).query('SELECT 1');
+		logger.info('db healthy!');
+		res.status(200).json({ message: 'healthy' });
+	} catch (e) {
+		logger.error(e);
+		res.status(500).json({ message: 'db unhealthy' });
+		return;
+	}
+});
+
 const server = app.listen(port, () => {
 	logger.info(`starting server :${port}`);
 });
