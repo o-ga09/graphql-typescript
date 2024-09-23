@@ -10,6 +10,15 @@ export const resolvers: Resolvers = {
 		// eslint-disable-next-line no-empty-pattern
 		authors: async (_parent, {}, { noteDao }) => {
 			const res = await noteDao.getNoteList('');
+			if (res.length === 0) {
+				return [
+					{
+						id: '',
+						name: '',
+						posts: [{ id: '', title: '', content: '', tags: [{ name: '' }] }],
+					},
+				];
+			}
 			return res.map((note) => {
 				return {
 					id: '',
@@ -19,7 +28,14 @@ export const resolvers: Resolvers = {
 			});
 		},
 		authorById: async (_parent, { id }, { noteDao }) => {
-			const res = await noteDao.getNoteList(id);
+			const res = await noteDao.getNoteDetail(id);
+			if (!res) {
+				return {
+					id: '',
+					name: '',
+					posts: [{ id: '', title: '', content: '', tags: [{ name: '' }] }],
+				};
+			}
 			return {
 				id: '',
 				name: res[0].title,
