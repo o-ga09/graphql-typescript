@@ -11,7 +11,7 @@ v20.12.0
 5.5.3
 
 # types/node version
-20.14.9
+20.12.0
 ```
 
 ## Get Started !
