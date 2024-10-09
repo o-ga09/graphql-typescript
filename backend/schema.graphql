@@ -9,26 +9,50 @@ type Note {
   tags: [PostTag!]!
 }
 
-interface User {
-  name: String!
+type User {
+  id: ID!
+  username: String!
+  email: String!
+  role: String!
 }
 
-type Author implements User {
+type Role {
   id: ID!
   name: String!
-  posts: [Note!]!
+  permissions: [String!]!
+}
+
+type AuthPayload {
+  token: String
+  user: User!
 }
 
 type Query {
-  authors: [Author!]!
-  authorById(id: ID!): Author
+  getUser(id: ID!): User
+  getUsers: [User]
+
+  getRole(id: ID!): Role
+  getRoles: [Role]
+
+  currentUser: User
+
+  getNotes: [Note]
+  getNoteById(id: ID!): Note
 }
 
 type Mutation {
-  createNote(title: String!, content: String!, tags: [String!]!, userId: String!): Note
-  updateNote(id: ID!, title: String, content: String, tags: [String!]): Note
+  createUser(username: String!, email: String!, role: String!): User
+  updateUser(id: ID!, username: String, email: String, role: String): User
+  deleteUser(id: ID!): User
+
+  createRole(name: String!, permissions: [String!]!): Role
+  updateRole(id: ID!, name: String, permissions: [String!]!): Role
+  deleteRole(id: ID!): Role
+
+  login(email: String!, password: String!): AuthPayload
+  logout: Boolean
+
+  createNote(title: String!, content: String!, tags: [String!]!): Note
+  updateNote(id: ID!, title: String, content: String, tags: [String!]!): Note
   deleteNote(id: ID!): Note
-  createAuthor(name: String!): Author
-  updateAuthor(id: ID!, name: String): Author
-  deleteAuthor(id: ID!): Author
 }

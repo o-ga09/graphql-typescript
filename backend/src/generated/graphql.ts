@@ -17,26 +17,25 @@ export type Scalars = {
   Float: { input: number; output: number; }
 };
 
-export type Author = User & {
-  __typename?: 'Author';
-  id: Scalars['ID']['output'];
-  name: Scalars['String']['output'];
-  posts: Array<Note>;
+export type AuthPayload = {
+  __typename?: 'AuthPayload';
+  token?: Maybe<Scalars['String']['output']>;
+  user: User;
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
-  createAuthor?: Maybe<Author>;
   createNote?: Maybe<Note>;
-  deleteAuthor?: Maybe<Author>;
+  createRole?: Maybe<Role>;
+  createUser?: Maybe<User>;
   deleteNote?: Maybe<Note>;
-  updateAuthor?: Maybe<Author>;
+  deleteRole?: Maybe<Role>;
+  deleteUser?: Maybe<User>;
+  login?: Maybe<AuthPayload>;
+  logout?: Maybe<Scalars['Boolean']['output']>;
   updateNote?: Maybe<Note>;
-};
-
-
-export type MutationCreateAuthorArgs = {
-  name: Scalars['String']['input'];
+  updateRole?: Maybe<Role>;
+  updateUser?: Maybe<User>;
 };
 
 
@@ -44,12 +43,19 @@ export type MutationCreateNoteArgs = {
   content: Scalars['String']['input'];
   tags: Array<Scalars['String']['input']>;
   title: Scalars['String']['input'];
-  userId: Scalars['String']['input'];
 };
 
 
-export type MutationDeleteAuthorArgs = {
-  id: Scalars['ID']['input'];
+export type MutationCreateRoleArgs = {
+  name: Scalars['String']['input'];
+  permissions: Array<Scalars['String']['input']>;
+};
+
+
+export type MutationCreateUserArgs = {
+  email: Scalars['String']['input'];
+  role: Scalars['String']['input'];
+  username: Scalars['String']['input'];
 };
 
 
@@ -58,17 +64,42 @@ export type MutationDeleteNoteArgs = {
 };
 
 
-export type MutationUpdateAuthorArgs = {
+export type MutationDeleteRoleArgs = {
   id: Scalars['ID']['input'];
-  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationDeleteUserArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationLoginArgs = {
+  email: Scalars['String']['input'];
+  password: Scalars['String']['input'];
 };
 
 
 export type MutationUpdateNoteArgs = {
   content?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['ID']['input'];
-  tags?: InputMaybe<Array<Scalars['String']['input']>>;
+  tags: Array<Scalars['String']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationUpdateRoleArgs = {
+  id: Scalars['ID']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  permissions: Array<Scalars['String']['input']>;
+};
+
+
+export type MutationUpdateUserArgs = {
+  email?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['ID']['input'];
+  role?: InputMaybe<Scalars['String']['input']>;
+  username?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Note = {
@@ -86,17 +117,43 @@ export type PostTag = {
 
 export type Query = {
   __typename?: 'Query';
-  authorById?: Maybe<Author>;
-  authors: Array<Author>;
+  currentUser?: Maybe<User>;
+  getNoteById?: Maybe<Note>;
+  getNotes?: Maybe<Array<Maybe<Note>>>;
+  getRole?: Maybe<Role>;
+  getRoles?: Maybe<Array<Maybe<Role>>>;
+  getUser?: Maybe<User>;
+  getUsers?: Maybe<Array<Maybe<User>>>;
 };
 
 
-export type QueryAuthorByIdArgs = {
+export type QueryGetNoteByIdArgs = {
   id: Scalars['ID']['input'];
 };
 
-export type User = {
+
+export type QueryGetRoleArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetUserArgs = {
+  id: Scalars['ID']['input'];
+};
+
+export type Role = {
+  __typename?: 'Role';
+  id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
+  permissions: Array<Scalars['String']['output']>;
+};
+
+export type User = {
+  __typename?: 'User';
+  email: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  role: Scalars['String']['output'];
+  username: Scalars['String']['output'];
 };
 
 
@@ -167,51 +224,53 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 ) => TResult | Promise<TResult>;
 
 
-/** Mapping of interface types */
-export type ResolversInterfaceTypes<_RefType extends Record<string, unknown>> = {
-  User: ( Author );
-};
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
-  Author: ResolverTypeWrapper<Author>;
+  AuthPayload: ResolverTypeWrapper<AuthPayload>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
   Note: ResolverTypeWrapper<Note>;
   PostTag: ResolverTypeWrapper<PostTag>;
   Query: ResolverTypeWrapper<{}>;
+  Role: ResolverTypeWrapper<Role>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
-  User: ResolverTypeWrapper<ResolversInterfaceTypes<ResolversTypes>['User']>;
+  User: ResolverTypeWrapper<User>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
-  Author: Author;
+  AuthPayload: AuthPayload;
   Boolean: Scalars['Boolean']['output'];
   ID: Scalars['ID']['output'];
   Mutation: {};
   Note: Note;
   PostTag: PostTag;
   Query: {};
+  Role: Role;
   String: Scalars['String']['output'];
-  User: ResolversInterfaceTypes<ResolversParentTypes>['User'];
+  User: User;
 };
 
-export type AuthorResolvers<ContextType = any, ParentType extends ResolversParentTypes['Author'] = ResolversParentTypes['Author']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  posts?: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType>;
+export type AuthPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['AuthPayload'] = ResolversParentTypes['AuthPayload']> = {
+  token?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  user?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
-  createAuthor?: Resolver<Maybe<ResolversTypes['Author']>, ParentType, ContextType, RequireFields<MutationCreateAuthorArgs, 'name'>>;
-  createNote?: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<MutationCreateNoteArgs, 'content' | 'tags' | 'title' | 'userId'>>;
-  deleteAuthor?: Resolver<Maybe<ResolversTypes['Author']>, ParentType, ContextType, RequireFields<MutationDeleteAuthorArgs, 'id'>>;
+  createNote?: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<MutationCreateNoteArgs, 'content' | 'tags' | 'title'>>;
+  createRole?: Resolver<Maybe<ResolversTypes['Role']>, ParentType, ContextType, RequireFields<MutationCreateRoleArgs, 'name' | 'permissions'>>;
+  createUser?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'email' | 'role' | 'username'>>;
   deleteNote?: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<MutationDeleteNoteArgs, 'id'>>;
-  updateAuthor?: Resolver<Maybe<ResolversTypes['Author']>, ParentType, ContextType, RequireFields<MutationUpdateAuthorArgs, 'id'>>;
-  updateNote?: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<MutationUpdateNoteArgs, 'id'>>;
+  deleteRole?: Resolver<Maybe<ResolversTypes['Role']>, ParentType, ContextType, RequireFields<MutationDeleteRoleArgs, 'id'>>;
+  deleteUser?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationDeleteUserArgs, 'id'>>;
+  login?: Resolver<Maybe<ResolversTypes['AuthPayload']>, ParentType, ContextType, RequireFields<MutationLoginArgs, 'email' | 'password'>>;
+  logout?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  updateNote?: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<MutationUpdateNoteArgs, 'id' | 'tags'>>;
+  updateRole?: Resolver<Maybe<ResolversTypes['Role']>, ParentType, ContextType, RequireFields<MutationUpdateRoleArgs, 'id' | 'permissions'>>;
+  updateUser?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'id'>>;
 };
 
 export type NoteResolvers<ContextType = any, ParentType extends ResolversParentTypes['Note'] = ResolversParentTypes['Note']> = {
@@ -228,21 +287,37 @@ export type PostTagResolvers<ContextType = any, ParentType extends ResolversPare
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  authorById?: Resolver<Maybe<ResolversTypes['Author']>, ParentType, ContextType, RequireFields<QueryAuthorByIdArgs, 'id'>>;
-  authors?: Resolver<Array<ResolversTypes['Author']>, ParentType, ContextType>;
+  currentUser?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  getNoteById?: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<QueryGetNoteByIdArgs, 'id'>>;
+  getNotes?: Resolver<Maybe<Array<Maybe<ResolversTypes['Note']>>>, ParentType, ContextType>;
+  getRole?: Resolver<Maybe<ResolversTypes['Role']>, ParentType, ContextType, RequireFields<QueryGetRoleArgs, 'id'>>;
+  getRoles?: Resolver<Maybe<Array<Maybe<ResolversTypes['Role']>>>, ParentType, ContextType>;
+  getUser?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryGetUserArgs, 'id'>>;
+  getUsers?: Resolver<Maybe<Array<Maybe<ResolversTypes['User']>>>, ParentType, ContextType>;
+};
+
+export type RoleResolvers<ContextType = any, ParentType extends ResolversParentTypes['Role'] = ResolversParentTypes['Role']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  permissions?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
-  __resolveType: TypeResolveFn<'Author', ParentType, ContextType>;
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  role?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type Resolvers<ContextType = any> = {
-  Author?: AuthorResolvers<ContextType>;
+  AuthPayload?: AuthPayloadResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Note?: NoteResolvers<ContextType>;
   PostTag?: PostTagResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
+  Role?: RoleResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
 };
 
