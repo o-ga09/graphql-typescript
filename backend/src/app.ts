@@ -6,10 +6,10 @@ import http from 'http';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import cors from 'cors';
 import { expressMiddleware } from '@apollo/server/express4';
-import { NoteDao } from '@/lib/dao/note';
 import { closeConnection, createConnection, dbconnection } from '@/db';
 import { logger } from '@/lib/middleware/logger';
 import dotenv from 'dotenv';
+import { authMiddleware } from './lib/middleware/auth';
 dotenv.config(); // dotenvパッケージを使用して環境変数を読み込む
 
 const port = process.env.PORT || 8080;
@@ -25,16 +25,15 @@ const AplloServer = new ApolloServer({
 });
 
 await AplloServer.start();
-
+app.use(authMiddleware);
 app.use(
 	'/graphql',
 	cors<cors.CorsRequest>(),
 	express.json(),
 	expressMiddleware(AplloServer, {
-		context: async () => {
-			const dbConnection = await createConnection();
-			const noteDao = new NoteDao(dbConnection);
-			return { noteDao };
+		context: async ({ req }) => {
+			const user = req.user || '';
+			return { user };
 		},
 	})
 );

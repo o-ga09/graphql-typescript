@@ -23,7 +23,9 @@
     "@graphql-tools/graphql-file-loader": "^8.0.1",
     "@graphql-tools/load": "^8.0.2",
     "@graphql-tools/schema": "^10.0.4",
+    "apollo-server-express": "^3.13.0",
     "graphql": "^16.8.2",
+    "jsonwebtoken": "^9.0.2",
     "ulid": "^2.3.0",
     "winston": "^3.14.2"
   },
