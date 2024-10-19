@@ -6,10 +6,11 @@ import http from 'http';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import cors from 'cors';
 import { expressMiddleware } from '@apollo/server/express4';
-import { closeConnection, createConnection, getConnection } from '@/db';
+import { closeConnection, createConnection, dbconnection, getConnection } from '@/db';
 import { logger } from '@/lib/middleware/logger';
 import dotenv from 'dotenv';
 import { authMiddleware } from './lib/middleware/auth';
+import { requestLoggerMiddleware } from './lib/middleware/requestlogger';
 dotenv.config(); // dotenvパッケージを使用して環境変数を読み込む
 
 const port = process.env.PORT || 8080;
@@ -27,6 +28,7 @@ const AplloServer = new ApolloServer({
 
 await AplloServer.start();
 app.use(authMiddleware);
+app.use(requestLoggerMiddleware);
 app.use(
 	'/graphql',
 	cors<cors.CorsRequest>(),
@@ -34,7 +36,7 @@ app.use(
 	expressMiddleware(AplloServer, {
 		context: async ({ req }) => {
 			const user = req.user || '';
-			const dbconnection = await getConnection();
+			await getConnection();
 			return { user, dbconnection };
 		},
 	})
@@ -50,8 +52,8 @@ app.get('/health_check', (req, res) => {
 
 app.get('/health_check/db', async (req, res) => {
 	try {
-		const conn = getConnection();
-		(await conn).query('SELECT 1');
+		await getConnection();
+		dbconnection.query('SELECT 1');
 		logger.info('db healthy!');
 		res.status(200).json({ message: 'healthy' });
 	} catch (e) {

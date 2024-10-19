@@ -1,11 +1,11 @@
-import { createPool, PoolConnection, Pool } from 'mysql2/promise';
+import mysql, { createPool, PoolConnection } from 'mysql2/promise';
 
-export let dbPool: Pool;
+export let dbconnection: mysql.Connection;
 export let Testdbconnection: PoolConnection;
 
 // Create a MySQL connection
 export const createConnection = async () => {
-	dbPool = await createPool({
+	dbconnection = await mysql.createConnection({
 		host: process.env.MYSQL_HOST,
 		port: Number(process.env.MYSQL_PORT),
 		user: process.env.MYSQL_USER,
@@ -15,12 +15,12 @@ export const createConnection = async () => {
 };
 
 export const getConnection = async () => {
-	return await dbPool.getConnection();
+	dbconnection.connect();
 };
 
 export const closeConnection = async () => {
-	if (dbPool) {
-		await dbPool.end();
+	if (dbconnection) {
+		await dbconnection.end();
 	}
 };
 
