@@ -7,6 +7,7 @@ CREATE TABLE users (
   password varchar(255) NOT NULL,
   sex integer NOT NULL,
   birthday varchar(255) NOT NULL,
+  role_id varchar(255) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
@@ -24,9 +25,20 @@ CREATE TABLE notes (
   PRIMARY KEY (id)
 );
 
+CREATE TABLE roles (
+  id   BIGINT  NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  role_id varchar(255) UNIQUE NOT NULL,
+  role_name varchar(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+);
+
 CREATE TABLE user_notes (
   user_id varchar(255) NOT NULL,
   note_id varchar(255) NOT NULL,
+  inserted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (user_id, note_id),
   FOREIGN KEY (user_id) REFERENCES users (user_id),
   FOREIGN KEY (note_id) REFERENCES notes (note_id)

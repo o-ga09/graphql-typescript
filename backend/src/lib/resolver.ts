@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-empty-pattern */
-import { AuthPayload, Note, PostTag, Resolvers, User } from '@/generated/graphql';
+import { AuthPayload, Note, PostTag, Resolvers, Role, User } from '@/generated/graphql';
 import fs from 'fs';
 import { NoteDao } from './dao/note';
 import { UserDao } from './dao/user';
 import { generateUlid } from './generateID/generateid';
 import jwt from 'jsonwebtoken';
+import { RoleDao } from './dao/role';
 
 export const typeDefs = fs.readFileSync('./schema.graphql', {
 	encoding: 'utf8',
@@ -13,58 +14,137 @@ export const typeDefs = fs.readFileSync('./schema.graphql', {
 
 export const resolvers: Resolvers = {
 	Query: {
-		getUser: async (_, { id }, { dataSources }) => {
-			return dataSources.userAPI.getUser(id);
+		getUser: async (_, { id }, { dbconnection }) => {
+			const userDao = new UserDao(dbconnection);
+			const user = await userDao.getUserDetail(id);
+			const resUser: User = {
+				id: user.userId,
+				username: user.name,
+				email: user.email,
+				role: user.address,
+				passwordHash: user.password,
+				sex: String(user.sex),
+				birthday: user.birthday,
+				address: user.address,
+			};
+			return resUser;
 		},
-		getUsers: async (_, __, { dataSources }) => {
-			return dataSources.userAPI.getUsers();
+		getUsers: async (_, __, { dbconnection }) => {
+			const userDao = new UserDao(dbconnection);
+			const users = await userDao.getUserList();
+			const resUsers: User[] = users.map((user) => {
+				return {
+					id: user.userId,
+					username: user.name,
+					email: user.email,
+					role: user.address,
+				};
+			});
+			return resUsers;
 		},
-		getRole: async (_, { id }, { dataSources }) => {
-			return dataSources.roleAPI.getRole(id);
+		getRole: async (_, { id }, { dbconnection }) => {
+			const roleDao = new RoleDao(dbconnection);
+			const role = await roleDao.getRoleDetail(id);
+			const resRole: Role = {
+				id: role.roleId,
+				name: role.roleName,
+				permissions: [],
+			};
+			return resRole;
 		},
-		getRoles: async (_, __, { dataSources }) => {
-			return dataSources.roleAPI.getRoles();
+		getRoles: async (_, __, { dbconnection }) => {
+			const roleDao = new RoleDao(dbconnection);
+			const role = await roleDao.getRoleList();
+			const resRoles: Role[] = role.map((role) => {
+				return {
+					id: role.roleId,
+					name: role.roleName,
+					permissions: [],
+				};
+			});
+			return resRoles;
 		},
-		getNoteById: async (_, { id }, { dataSources }) => {
-			return dataSources.noteAPI.getNoteById(id);
+		getNoteById: async (_, { id }, { dbconnection }) => {
+			const noteDao = new NoteDao(dbconnection);
+			const note = await noteDao.getNoteDetail(id);
+			const posttag: PostTag[] = note.tags.split(',').map((tag) => {
+				return { name: tag };
+			});
+			const resNote: Note = {
+				id: note.noteId,
+				title: note.title,
+				content: note.content,
+				tags: posttag,
+			};
+			return resNote;
 		},
-		getNotes: async (_, __, { dataSources }) => {
-			return dataSources.noteAPI.getNotes();
+		getNotes: async (_, __, { userId, dbconnection }) => {
+			const noteDao = new NoteDao(dbconnection);
+			const note = await noteDao.getNoteList(userId);
+			const resNotes: Note[] = note.map((note) => {
+				const posttag: PostTag[] = note.tags.split(',').map((tag) => {
+					return { name: tag };
+				});
+				return {
+					id: note.noteId,
+					title: note.title,
+					content: note.content,
+					tags: posttag,
+				};
+			});
+			return resNotes;
 		},
 	},
 	Mutation: {
-		createUser: async (_, { username, email, role }, dataSources: UserDao) => {
+		createUser: async (_, { username, email, role, birthday, sex, passwordHash, address }, { dbconnection }) => {
 			const userId = generateUlid();
-			await dataSources.createUser({
+			const userDao = new UserDao(dbconnection);
+			await userDao.createUser({
 				userId: userId,
 				name: username,
-				sex: 1,
-				birthday: '',
-				password: '',
+				sex: Number(sex),
+				birthday: birthday,
+				password: passwordHash,
 				email: email,
-				address: role,
+				address: address,
 			});
-			const createdUser = await dataSources.getUserDetail(userId);
+			const createdUser = await userDao.getUserDetail(userId);
 			const res: User = {
 				id: createdUser.userId,
 				username: createdUser.name,
 				email: createdUser.email,
 				role: createdUser.address,
+				birthday: createdUser.birthday,
+				sex: String(createdUser.sex),
+				passwordHash: createdUser.password,
+				address: createdUser.address,
 			};
 			return res;
 		},
-		createRole: async (_, { name, permissions }, { dataSources }) => {
-			return dataSources.roleAPI.createRole(input);
+		createRole: async (_, { name, permissions }, { dbconnection }) => {
+			const roleId = generateUlid();
+			const roleDao = new RoleDao(dbconnection);
+			await roleDao.createRole({
+				roleName: name,
+			});
+			const createdRole = await roleDao.getRoleDetail(roleId);
+			const res: Role = {
+				id: createdRole.roleId,
+				name: createdRole.roleName,
+				permissions: [],
+			};
+			return res;
 		},
-		createNote: async (_, { title, content, tags }, dataSources: NoteDao) => {
+		createNote: async (_, { title, content, tags }, { userId, dbconnection }) => {
+			const noteDao = new NoteDao(dbconnection);
 			const tag = tags.join(',');
-			const noteId = await dataSources.createNote({
+			const noteId = await noteDao.createNote({
 				title: title,
 				tags: tag,
 				content: content,
-				userId: '1',
+				userId: userId,
 			});
-			const createdNote = await dataSources.getNoteDetail(noteId);
+			const createdNote = await noteDao.getNoteDetail(noteId);
 			const posttag: PostTag[] = createdNote.tags.split(',').map((tag) => {
 				return { name: tag };
 			});
@@ -77,36 +157,53 @@ export const resolvers: Resolvers = {
 			return res;
 		},
 
-		updateUser: async (_, { id, username, email, role }, dataSources: UserDao) => {
-			await dataSources.updateUser({
+		updateUser: async (_, { id, username, email, role, birthday, sex, passwordHash, address }, { dbconnection }) => {
+			const userDao = new UserDao(dbconnection);
+			await userDao.updateUser({
 				userId: id,
 				name: username,
 				email: email,
-				address: role,
-				sex: 1,
-				birthday: '',
-				password: '',
+				address: address,
+				sex: Number(sex),
+				birthday: birthday,
+				password: passwordHash,
 			});
-			const updatedUser = await dataSources.getUserDetail(id);
+			const updatedUser = await userDao.getUserDetail(id);
 			const res: User = {
 				id: updatedUser.userId,
 				username: updatedUser.name,
 				email: updatedUser.email,
-				role: updatedUser.address,
+				role: updatedUser.roleId,
+				birthday: updatedUser.birthday,
+				sex: String(updatedUser.sex),
+				passwordHash: updatedUser.password,
+				address: updatedUser.address,
 			};
 			return res;
 		},
-		updateRole: async (_, { id, name, permissions }, { dataSources }) => {
-			return dataSources.roleAPI.updateRole(id, input);
+		updateRole: async (_, { id, name, permissions }, { dbconnection }) => {
+			const roleDao = new RoleDao(dbconnection);
+			await roleDao.updateRole({
+				roleId: id,
+				roleName: name,
+			});
+			const updatedRole = await roleDao.getRoleDetail(id);
+			const res: Role = {
+				id: updatedRole.roleId,
+				name: updatedRole.roleName,
+				permissions: [],
+			};
+			return res;
 		},
-		updateNote: async (_, { id, title, content, tags }, dataSources: NoteDao) => {
-			await dataSources.updateNote({
+		updateNote: async (_, { id, title, content, tags }, { dbconnection }) => {
+			const noteDao = new NoteDao(dbconnection);
+			await noteDao.updateNote({
 				noteId: id,
 				title: title,
 				tags: tags.join(','),
 				content: content,
 			});
-			const updatedNote = await dataSources.getNoteDetail(id);
+			const updatedNote = await noteDao.getNoteDetail(id);
 			const posttag: PostTag[] = updatedNote.tags.split(',').map((tag) => {
 				return { name: tag };
 			});
@@ -119,9 +216,10 @@ export const resolvers: Resolvers = {
 			return res;
 		},
 
-		deleteUser: async (_, { id }, dataSources: UserDao) => {
-			await dataSources.deleteUser(id);
-			const deletedUser = await dataSources.getUserDetail(id);
+		deleteUser: async (_, { id }, { dbconnection }) => {
+			const userDao = new UserDao(dbconnection);
+			await userDao.deleteUser(id);
+			const deletedUser = await userDao.getUserDetail(id);
 			const res: User = {
 				id: deletedUser.userId,
 				username: deletedUser.name,
@@ -130,12 +228,21 @@ export const resolvers: Resolvers = {
 			};
 			return res;
 		},
-		deleteRole: async (_, { id }, { dataSources }) => {
-			return dataSources.roleAPI.deleteRole(id);
+		deleteRole: async (_, { id }, { dbconnection }) => {
+			const roleDao = new RoleDao(dbconnection);
+			await roleDao.deleteRole(id);
+			const deletedRole = await roleDao.getRoleDetail(id);
+			const res: Role = {
+				id: deletedRole.roleId,
+				name: deletedRole.roleName,
+				permissions: [],
+			};
+			return res;
 		},
-		deleteNote: async (_, { id }, dataSources: NoteDao) => {
-			await dataSources.deleteNote(id);
-			const deletedNote = await dataSources.getNoteDetail(id);
+		deleteNote: async (_, { id }, { dbconnection }) => {
+			const noteDao = new NoteDao(dbconnection);
+			await noteDao.deleteNote(id);
+			const deletedNote = await noteDao.getNoteDetail(id);
 			const posttag: PostTag[] = deletedNote.tags.split(',').map((tag) => {
 				return { name: tag };
 			});
@@ -148,16 +255,27 @@ export const resolvers: Resolvers = {
 			return res;
 		},
 
-		login: async (_, { email, password }, {}) => {
-			const user = await authenticateUser(email, password);
-			const token = jwt.sign({ id: user.id, username: user.username }, 'your_secret_key', { expiresIn: '1h' });
+		login: async (_, { email, password }, { userId, dbconnection }) => {
+			if (!userId) {
+				throw new Error('Not authenticated');
+			}
+			const userDao = new UserDao(dbconnection);
+			const resuser = await userDao.getUserDetail(userId);
+			const user: User = {
+				id: resuser.userId,
+				username: resuser.name,
+				email: resuser.email,
+				role: resuser.roleId,
+			};
+			const authUser = await authenticateUser(email, password, user);
+			const token = jwt.sign({ id: authUser.id, username: authUser.username }, 'your_secret_key', { expiresIn: '1h' });
 			const res: AuthPayload = {
 				token: token,
 				user: {
-					id: user.id,
-					username: user.username,
-					email: '',
-					role: '',
+					id: authUser.id,
+					username: authUser.username,
+					email: email,
+					role: authUser.role,
 				},
 			};
 			return res;
@@ -168,11 +286,23 @@ export const resolvers: Resolvers = {
 	},
 };
 
-function authenticateUser(email: string, password: string): Promise<{ id: string; username: string }> {
+async function authenticateUser(
+	email: string,
+	password: string,
+	user: User
+): Promise<{ id: string; username: string; role: string }> {
 	return new Promise((resolve, reject) => {
 		if (email === '' || password === '') {
 			reject('Invalid email or password');
 		}
-		resolve({ id: '1', username: 'admin' });
+
+		if (user.email !== email) {
+			reject('Invalid email or password');
+		}
+
+		if (user.passwordHash !== password) {
+			reject('Invalid email or password');
+		}
+		resolve({ id: user.id, username: user.username, role: user.role });
 	});
 }

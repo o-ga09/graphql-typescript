@@ -6,7 +6,7 @@ import http from 'http';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import cors from 'cors';
 import { expressMiddleware } from '@apollo/server/express4';
-import { closeConnection, createConnection, dbconnection } from '@/db';
+import { closeConnection, createConnection, getConnection } from '@/db';
 import { logger } from '@/lib/middleware/logger';
 import dotenv from 'dotenv';
 import { authMiddleware } from './lib/middleware/auth';
@@ -16,6 +16,7 @@ const port = process.env.PORT || 8080;
 
 const app = express();
 const httpServer = http.createServer(app);
+await createConnection();
 
 const AplloServer = new ApolloServer({
 	typeDefs,
@@ -33,7 +34,8 @@ app.use(
 	expressMiddleware(AplloServer, {
 		context: async ({ req }) => {
 			const user = req.user || '';
-			return { user };
+			const dbconnection = await getConnection();
+			return { user, dbconnection };
 		},
 	})
 );
@@ -48,7 +50,7 @@ app.get('/health_check', (req, res) => {
 
 app.get('/health_check/db', async (req, res) => {
 	try {
-		const conn = createConnection();
+		const conn = getConnection();
 		(await conn).query('SELECT 1');
 		logger.info('db healthy!');
 		res.status(200).json({ message: 'healthy' });
@@ -67,7 +69,7 @@ process.on('SIGTERM', () => {
 	// サーバをシャットダウンする
 	server.close(() => {
 		// シャットダウン時の処理を実装する
-		closeConnection(dbconnection);
+		closeConnection();
 		logger.info('SIGTERM signal received.');
 	});
 });

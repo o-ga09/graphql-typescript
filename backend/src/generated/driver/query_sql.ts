@@ -3,9 +3,8 @@ import mysql, { RowDataPacket } from "mysql2/promise";
 type Client = mysql.Connection | mysql.Pool;
 
 export const getNoteQuery = `-- name: GetNote :one
-SELECT id, notes.note_id, title, tags, content, created_at, updated_at FROM notes
-JOIN user_notes ON notes.note_id = user_notes.note_id
-WHERE user_notes.note_id = ? AND notes.deleted_at IS NULL LIMIT 1`;
+SELECT id, note_id, title, tags, content, created_at, updated_at FROM notes
+WHERE note_id = ? AND deleted_at IS NULL LIMIT 1`;
 
 export interface GetNoteArgs {
     noteId: string;
@@ -43,7 +42,7 @@ export async function getNote(client: Client, args: GetNoteArgs): Promise<GetNot
 }
 
 export const getNotesQuery = `-- name: GetNotes :many
-SELECT id, notes.note_id, title, tags, content, created_at, updated_at FROM notes
+SELECT id, notes.note_id, title, tags, content, notes.created_at, notes.updated_at FROM notes
 JOIN user_notes ON notes.note_id = user_notes.note_id
 WHERE user_notes.user_id = ? AND notes.deleted_at IS NULL
 ORDER BY created_at DESC`;
@@ -146,25 +145,27 @@ INSERT INTO users (
     name,
     email,
     address,
+    password,
     sex,
     birthday,
-    password
-) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    role_id
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 
 export interface CreateUserArgs {
     userId: string;
     name: string;
     email: string;
     address: string;
+    password: string;
     sex: number;
     birthday: string;
-    password: string;
+    roleId: string;
 }
 
 export async function createUser(client: Client, args: CreateUserArgs): Promise<void> {
     await client.query({
         sql: createUserQuery,
-        values: [args.userId, args.name, args.email, args.address, args.sex, args.birthday, args.password]
+        values: [args.userId, args.name, args.email, args.address, args.password, args.sex, args.birthday, args.roleId]
     });
 }
 
@@ -178,6 +179,7 @@ SELECT
     password,
     sex,
     birthday,
+    role_id,
     created_at,
     updated_at
 FROM users
@@ -196,6 +198,7 @@ export interface GetUserRow {
     password: string;
     sex: number;
     birthday: string;
+    roleId: string;
     createdAt: Date | null;
     updatedAt: Date | null;
 }
@@ -219,8 +222,9 @@ export async function getUser(client: Client, args: GetUserArgs): Promise<GetUse
         password: row[5],
         sex: row[6],
         birthday: row[7],
-        createdAt: row[8],
-        updatedAt: row[9]
+        roleId: row[8],
+        createdAt: row[9],
+        updatedAt: row[10]
     };
 }
 
@@ -234,6 +238,7 @@ SELECT
     password,
     sex,
     birthday,
+    role_id,
     created_at,
     updated_at
 FROM users
@@ -248,6 +253,7 @@ export interface GetUsersRow {
     password: string;
     sex: number;
     birthday: string;
+    roleId: string;
     createdAt: Date | null;
     updatedAt: Date | null;
 }
@@ -268,8 +274,9 @@ export async function getUsers(client: Client): Promise<GetUsersRow[]> {
             password: row[5],
             sex: row[6],
             birthday: row[7],
-            createdAt: row[8],
-            updatedAt: row[9]
+            roleId: row[8],
+            createdAt: row[9],
+            updatedAt: row[10]
         };
     });
 }
@@ -281,7 +288,8 @@ SET name = ?,
     address = ?,
     sex = ?,
     birthday = ?,
-    password = ?
+    password = ?,
+    role_id = ?
 WHERE user_id = ?`;
 
 export interface UpdateUserArgs {
@@ -291,13 +299,14 @@ export interface UpdateUserArgs {
     sex: number;
     birthday: string;
     password: string;
+    roleId: string;
     userId: string;
 }
 
 export async function updateUser(client: Client, args: UpdateUserArgs): Promise<void> {
     await client.query({
         sql: updateUserQuery,
-        values: [args.name, args.email, args.address, args.sex, args.birthday, args.password, args.userId]
+        values: [args.name, args.email, args.address, args.sex, args.birthday, args.password, args.roleId, args.userId]
     });
 }
 
@@ -331,6 +340,148 @@ export async function createUserNote(client: Client, args: CreateUserNoteArgs): 
     await client.query({
         sql: createUserNoteQuery,
         values: [args.userId, args.noteId]
+    });
+}
+
+export const deleteUserNoteQuery = `-- name: DeleteUserNote :exec
+DELETE FROM user_notes
+WHERE user_id = ? AND note_id = ?`;
+
+export interface DeleteUserNoteArgs {
+    userId: string;
+    noteId: string;
+}
+
+export async function deleteUserNote(client: Client, args: DeleteUserNoteArgs): Promise<void> {
+    await client.query({
+        sql: deleteUserNoteQuery,
+        values: [args.userId, args.noteId]
+    });
+}
+
+export const createRoleQuery = `-- name: CreateRole :exec
+INSERT INTO roles (
+    role_id,
+    role_name
+) VALUES (?, ?)`;
+
+export interface CreateRoleArgs {
+    roleId: string;
+    roleName: string;
+}
+
+export async function createRole(client: Client, args: CreateRoleArgs): Promise<void> {
+    await client.query({
+        sql: createRoleQuery,
+        values: [args.roleId, args.roleName]
+    });
+}
+
+export const getRoleQuery = `-- name: GetRole :one
+SELECT 
+    id,
+    role_id,
+    role_name,
+    created_at,
+    updated_at
+FROM roles
+WHERE role_id = ? LIMIT 1`;
+
+export interface GetRoleArgs {
+    roleId: string;
+}
+
+export interface GetRoleRow {
+    id: number;
+    roleId: string;
+    roleName: string;
+    createdAt: Date | null;
+    updatedAt: Date | null;
+}
+
+export async function getRole(client: Client, args: GetRoleArgs): Promise<GetRoleRow | null> {
+    const [rows] = await client.query<RowDataPacket[]>({
+        sql: getRoleQuery,
+        values: [args.roleId],
+        rowsAsArray: true
+    });
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    return {
+        id: row[0],
+        roleId: row[1],
+        roleName: row[2],
+        createdAt: row[3],
+        updatedAt: row[4]
+    };
+}
+
+export const getRolesQuery = `-- name: GetRoles :many
+SELECT 
+    id,
+    role_id,
+    role_name,
+    created_at,
+    updated_at
+FROM roles
+ORDER BY created_at DESC`;
+
+export interface GetRolesRow {
+    id: number;
+    roleId: string;
+    roleName: string;
+    createdAt: Date | null;
+    updatedAt: Date | null;
+}
+
+export async function getRoles(client: Client): Promise<GetRolesRow[]> {
+    const [rows] = await client.query<RowDataPacket[]>({
+        sql: getRolesQuery,
+        values: [],
+        rowsAsArray: true
+    });
+    return rows.map(row => {
+        return {
+            id: row[0],
+            roleId: row[1],
+            roleName: row[2],
+            createdAt: row[3],
+            updatedAt: row[4]
+        };
+    });
+}
+
+export const updateRoleQuery = `-- name: UpdateRole :exec
+UPDATE roles
+SET role_name = ?
+WHERE role_id = ?`;
+
+export interface UpdateRoleArgs {
+    roleName: string;
+    roleId: string;
+}
+
+export async function updateRole(client: Client, args: UpdateRoleArgs): Promise<void> {
+    await client.query({
+        sql: updateRoleQuery,
+        values: [args.roleName, args.roleId]
+    });
+}
+
+export const deleteRoleQuery = `-- name: DeleteRole :exec
+DELETE FROM roles
+WHERE role_id = ?`;
+
+export interface DeleteRoleArgs {
+    roleId: string;
+}
+
+export async function deleteRole(client: Client, args: DeleteRoleArgs): Promise<void> {
+    await client.query({
+        sql: deleteRoleQuery,
+        values: [args.roleId]
     });
 }
 

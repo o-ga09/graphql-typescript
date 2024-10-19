@@ -1,10 +1,9 @@
 -- name: GetNote :one
-SELECT id, notes.note_id, title, tags, content, created_at, updated_at FROM notes
-JOIN user_notes ON notes.note_id = user_notes.note_id
-WHERE user_notes.note_id = ? AND notes.deleted_at IS NULL LIMIT 1;
+SELECT id, note_id, title, tags, content, created_at, updated_at FROM notes
+WHERE note_id = ? AND deleted_at IS NULL LIMIT 1;
 
 -- name: GetNotes :many
-SELECT id, notes.note_id, title, tags, content, created_at, updated_at FROM notes
+SELECT id, notes.note_id, title, tags, content, notes.created_at, notes.updated_at FROM notes
 JOIN user_notes ON notes.note_id = user_notes.note_id
 WHERE user_notes.user_id = ? AND notes.deleted_at IS NULL
 ORDER BY created_at DESC;
@@ -35,10 +34,11 @@ INSERT INTO users (
     name,
     email,
     address,
+    password,
     sex,
     birthday,
-    password
-) VALUES (?, ?, ?, ?, ?, ?, ?);
+    role_id
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: GetUser :one
 SELECT 
@@ -50,6 +50,7 @@ SELECT
     password,
     sex,
     birthday,
+    role_id,
     created_at,
     updated_at
 FROM users
@@ -65,6 +66,7 @@ SELECT
     password,
     sex,
     birthday,
+    role_id,
     created_at,
     updated_at
 FROM users
@@ -77,7 +79,8 @@ SET name = ?,
     address = ?,
     sex = ?,
     birthday = ?,
-    password = ?
+    password = ?,
+    role_id = ?
 WHERE user_id = ?;
 
 -- name: DeleteUser :exec
@@ -89,3 +92,42 @@ INSERT INTO user_notes (
     user_id,
     note_id
 ) VALUES (?, ?);
+
+-- name: DeleteUserNote :exec
+DELETE FROM user_notes
+WHERE user_id = ? AND note_id = ?;
+
+-- name: CreateRole :exec
+INSERT INTO roles (
+    role_id,
+    role_name
+) VALUES (?, ?);
+
+-- name: GetRole :one
+SELECT 
+    id,
+    role_id,
+    role_name,
+    created_at,
+    updated_at
+FROM roles
+WHERE role_id = ? LIMIT 1;
+
+-- name: GetRoles :many
+SELECT 
+    id,
+    role_id,
+    role_name,
+    created_at,
+    updated_at
+FROM roles
+ORDER BY created_at DESC;
+
+-- name: UpdateRole :exec
+UPDATE roles
+SET role_name = ?
+WHERE role_id = ?;
+
+-- name: DeleteRole :exec
+DELETE FROM roles
+WHERE role_id = ?;
