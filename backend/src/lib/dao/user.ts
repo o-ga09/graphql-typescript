@@ -25,6 +25,7 @@ export class UserDao {
 		sex: number;
 		birthday: string;
 		password: string;
+		roleId: string;
 	}): Promise<void> {
 		try {
 			await updateUser(this.connection, {
@@ -35,6 +36,7 @@ export class UserDao {
 				sex: param.sex,
 				birthday: param.birthday,
 				password: param.password,
+				roleId: param.roleId,
 			});
 		} catch (e) {
 			console.error(e);
@@ -50,6 +52,7 @@ export class UserDao {
 		sex: number;
 		birthday: string;
 		password: string;
+		roleId: string;
 	}): Promise<void> {
 		try {
 			await createUser(this.connection, {
@@ -60,6 +63,7 @@ export class UserDao {
 				sex: param.sex,
 				birthday: param.birthday,
 				password: param.password,
+				roleId: param.roleId,
 			});
 		} catch (e) {
 			console.error(e);

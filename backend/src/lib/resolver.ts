@@ -109,6 +109,7 @@ export const resolvers: Resolvers = {
 				password: passwordHash,
 				email: email,
 				address: address,
+				roleId: role,
 			});
 			const createdUser = await userDao.getUserDetail(userId);
 			const res: User = {
@@ -124,9 +125,8 @@ export const resolvers: Resolvers = {
 			return res;
 		},
 		createRole: async (_, { name, permissions }, { dbconnection }) => {
-			const roleId = generateUlid();
 			const roleDao = new RoleDao(dbconnection);
-			await roleDao.createRole({
+			const roleId = await roleDao.createRole({
 				roleName: name,
 			});
 			const createdRole = await roleDao.getRoleDetail(roleId);
@@ -161,14 +161,16 @@ export const resolvers: Resolvers = {
 
 		updateUser: async (_, { id, username, email, role, birthday, sex, passwordHash, address }, { dbconnection }) => {
 			const userDao = new UserDao(dbconnection);
+			const user = await userDao.getUserDetail(id);
 			await userDao.updateUser({
-				userId: id,
-				name: username,
-				email: email,
-				address: address,
-				sex: Number(sex),
-				birthday: birthday,
-				password: passwordHash,
+				userId: id ? id : user.userId,
+				name: username ? username : user.name,
+				email: email ? email : user.email,
+				address: address ? address : user.address,
+				sex: Number(sex) ? Number(sex) : user.sex,
+				birthday: birthday ? birthday : user.birthday,
+				password: passwordHash ? passwordHash : user.password,
+				roleId: role ? role : user.roleId,
 			});
 			const updatedUser = await userDao.getUserDetail(id);
 			const res: User = {
@@ -185,9 +187,10 @@ export const resolvers: Resolvers = {
 		},
 		updateRole: async (_, { id, name, permissions }, { dbconnection }) => {
 			const roleDao = new RoleDao(dbconnection);
+			const role = await roleDao.getRoleDetail(id);
 			await roleDao.updateRole({
-				roleId: id,
-				roleName: name,
+				roleId: id ? id : role.roleId,
+				roleName: name ? name : role.roleName,
 			});
 			const updatedRole = await roleDao.getRoleDetail(id);
 			const res: Role = {
@@ -199,11 +202,12 @@ export const resolvers: Resolvers = {
 		},
 		updateNote: async (_, { id, title, content, tags }, { dbconnection }) => {
 			const noteDao = new NoteDao(dbconnection);
+			const note = await noteDao.getNoteDetail(id);
 			await noteDao.updateNote({
-				noteId: id,
-				title: title,
-				tags: tags.join(','),
-				content: content,
+				noteId: id ? id : note.noteId,
+				title: title ? title : note.title,
+				tags: tags.join(',') ? tags.join(',') : note.tags,
+				content: content ? content : note.content,
 			});
 			const updatedNote = await noteDao.getNoteDetail(id);
 			const posttag: PostTag[] = updatedNote.tags.split(',').map((tag) => {
