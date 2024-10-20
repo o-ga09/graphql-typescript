@@ -53,7 +53,7 @@ type Mutation {
   updateRole(id: ID!, name: String, permissions: [String!]!): Role
   deleteRole(id: ID!): Role
 
-  login(email: String!, password: String!): AuthPayload
+  login(userId: String, email: String, password: String!): AuthPayload
   logout: Boolean
 
   createNote(title: String!, content: String!, tags: [String!]!): Note

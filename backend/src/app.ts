@@ -35,9 +35,9 @@ app.use(
 	express.json(),
 	expressMiddleware(AplloServer, {
 		context: async ({ req }) => {
-			const user = req.user || '';
+			const userId = req.user || '';
 			await getConnection();
-			return { user, dbconnection };
+			return { userId, dbconnection };
 		},
 	})
 );

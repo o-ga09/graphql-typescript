@@ -7,6 +7,7 @@ import { UserDao } from './dao/user';
 import { generateUlid } from './generateID/generateid';
 import jwt from 'jsonwebtoken';
 import { RoleDao } from './dao/role';
+import { GetUserRow } from '@/generated/driver/query_sql';
 
 export const typeDefs = fs.readFileSync('./schema.graphql', {
 	encoding: 'utf8',
@@ -79,6 +80,7 @@ export const resolvers: Resolvers = {
 			return resNote;
 		},
 		getNotes: async (_, __, { userId, dbconnection }) => {
+			console.log(userId);
 			const noteDao = new NoteDao(dbconnection);
 			const note = await noteDao.getNoteList(userId);
 			const resNotes: Note[] = note.map((note) => {
@@ -255,26 +257,33 @@ export const resolvers: Resolvers = {
 			return res;
 		},
 
-		login: async (_, { email, password }, { userId, dbconnection }) => {
-			if (!userId) {
-				throw new Error('Not authenticated');
-			}
+		login: async (_, { userId, email, password }, { dbconnection }) => {
 			const userDao = new UserDao(dbconnection);
-			const resuser = await userDao.getUserDetail(userId);
+			let resuser: GetUserRow;
+
+			if (!userId || userId !== '') {
+				resuser = await userDao.getUserDetail(userId);
+			} else {
+				resuser = await userDao.getUserDetail(email);
+			}
+
 			const user: User = {
 				id: resuser.userId,
 				username: resuser.name,
 				email: resuser.email,
 				role: resuser.roleId,
 			};
-			const authUser = await authenticateUser(email, password, user);
-			const token = jwt.sign({ id: authUser.id, username: authUser.username }, 'your_secret_key', { expiresIn: '1h' });
+			const authUser = await authenticateUser(userId, email, password, user);
+			const token = jwt.sign({ id: authUser.id }, 'your_secret_key', {
+				expiresIn: 3600,
+				algorithm: 'HS256',
+			});
 			const res: AuthPayload = {
 				token: token,
 				user: {
 					id: authUser.id,
 					username: authUser.username,
-					email: email,
+					email: authUser.email,
 					role: authUser.role,
 				},
 			};
@@ -287,22 +296,27 @@ export const resolvers: Resolvers = {
 };
 
 async function authenticateUser(
+	userId: string,
 	email: string,
 	password: string,
 	user: User
-): Promise<{ id: string; username: string; role: string }> {
+): Promise<{ id: string; username: string; email: string; role: string }> {
 	return new Promise((resolve, reject) => {
-		if (email === '' || password === '') {
+		if (userId === '' || email === '' || password === '') {
 			reject('Invalid email or password');
 		}
 
-		if (user.email !== email) {
+		if (userId && user.id !== userId) {
 			reject('Invalid email or password');
 		}
 
-		if (user.passwordHash !== password) {
+		if (email && user.email !== email) {
 			reject('Invalid email or password');
 		}
-		resolve({ id: user.id, username: user.username, role: user.role });
+
+		// if (user.passwordHash !== password) {
+		// 	reject('Invalid email or password');
+		// }
+		resolve({ id: user.id, username: user.username, email: user.email, role: user.role });
 	});
 }

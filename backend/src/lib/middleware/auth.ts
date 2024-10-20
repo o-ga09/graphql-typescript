@@ -11,11 +11,11 @@ import { AuthenticationError } from 'apollo-server-express';
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
 	const token = req.headers.authorization || '';
-
 	if (token) {
 		try {
-			const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_secret_key');
-			req.user = decoded;
+			jwt.verify(token, 'your_secret_key', (err, user) => {
+				req.user = user.id;
+			});
 		} catch (err) {
 			throw new AuthenticationError('Invalid/Expired token', err);
 		}
