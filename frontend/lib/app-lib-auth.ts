@@ -18,7 +18,6 @@ export const login = async (
       mutation: LoginDocument,
       variables: { email, password },
     });
-    console.log(data);
     if (data && data.login && data.login.token) {
       localStorage.setItem("token", data.login.token);
       isLoggedIn = true;
