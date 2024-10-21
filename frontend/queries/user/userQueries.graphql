@@ -1,0 +1,82 @@
+query GetUser($id: ID!) {
+  getUser(id: $id) {
+    userId
+    username
+    email
+    birthday
+    sex
+    address
+    role
+  }
+}
+
+query GetUsers {
+  getUsers {
+    userId
+    username
+    email
+    birthday
+    sex
+    address
+    role
+  }
+}
+
+mutation CreateUser(
+  $username: String!
+  $email: String!
+  $role: String!
+  $birthday: String!
+  $sex: String!
+  $passwordHash: String!
+  $address: String!
+) {
+  createUser(
+    username: $username
+    email: $email
+    role: $role
+    birthday: $birthday
+    sex: $sex
+    passwordHash: $passwordHash
+    address: $address
+  ) {
+    userId
+    username
+    email
+    birthday
+    sex
+    address
+    role
+  }
+}
+
+mutation Login($email: String!, $password: String!) {
+  login(email: $email, password: $password) {
+    token
+    user {
+      userId
+      username
+      email
+      birthday
+      sex
+      address
+      role
+    }
+  }
+}
+
+mutation Logout {
+  logout
+}
+
+query CurrentUser {
+  currentUser {
+    userId
+    username
+    email
+    birthday
+    sex
+    address
+    role
+  }
+}

@@ -1,0 +1,12 @@
+schema: "../backend/schema.graphql" # スキーマファイルのパスを指定
+documents: "./**/*.graphql" # クエリやミューテーションのファイルパスを指定
+generates:
+  lib/generated/graphql.tsx:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-react-apollo"
+    config:
+      withHooks: true
+      withHOC: false
+      withComponent: false

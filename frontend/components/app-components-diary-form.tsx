@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createDiary, updateDiary, deleteDiary } from "@/lib/app-lib-api";
+import { deleteDiary } from "@/lib/app-lib-api";
+import { useMutation } from "@apollo/client";
+import { CreateNoteDocument } from "@/lib/generated/graphql";
 
 interface DiaryFormProps {
   currentUser: string | null;
@@ -10,22 +12,28 @@ interface DiaryFormProps {
     id: number;
     title: string;
     content: string;
+    tags: string;
   };
 }
 
 export function DiaryFormComponent({ currentUser, diary }: DiaryFormProps) {
   const [title, setTitle] = useState(diary?.title || "");
   const [content, setContent] = useState(diary?.content || "");
+  const [tags, setTags] = useState(diary?.tags || "");
+  const [createNote] = useMutation(CreateNoteDocument);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
 
-    if (diary) {
-      await updateDiary(diary.id, { title, content });
-    } else {
-      await createDiary({ title, content, author: currentUser });
+    try {
+      const { data } = await createNote({
+        variables: { title, content, tags },
+      });
+      console.log("Note created:", data);
+    } catch (error) {
+      console.error("Error creating note:", error);
     }
     router.push("/diaries");
   };
@@ -66,6 +74,22 @@ export function DiaryFormComponent({ currentUser, diary }: DiaryFormProps) {
           id="content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
+          required
+          rows={5}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+        ></textarea>
+      </div>
+      <div>
+        <label
+          htmlFor="content"
+          className="block text-sm font-medium text-gray-700"
+        >
+          タグ
+        </label>
+        <textarea
+          id="tags"
+          value={tags}
+          onChange={(e) => setTags(e.target.value)}
           required
           rows={5}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"

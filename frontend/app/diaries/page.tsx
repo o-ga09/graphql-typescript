@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { isAuthenticated, getCurrentUser } from "@/lib/app-lib-auth";
+import { isAuthenticated } from "@/lib/app-lib-auth";
 import { DiaryListComponent } from "@/components/app-components-diary-list";
 
 export default function Page() {
@@ -27,7 +27,7 @@ export default function Page() {
             <div className="divide-y divide-gray-200">
               <div className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
                 <h2 className="text-2xl font-bold mb-4">日記一覧</h2>
-                <DiaryListComponent currentUser={getCurrentUser()} />
+                <DiaryListComponent />
                 <div className="mt-8">
                   <Link
                     href="/diaries/new"

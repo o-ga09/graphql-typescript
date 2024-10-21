@@ -1,0 +1,54 @@
+query GetNotes {
+  getNotes {
+    noteId
+    title
+    content
+    tags {
+      name
+    }
+  }
+}
+
+query GetNoteById($id: ID!) {
+  getNoteById(id: $id) {
+    noteId
+    title
+    content
+    tags {
+      name
+    }
+  }
+}
+
+mutation CreateNote($title: String!, $content: String!, $tags: [String!]!) {
+  createNote(title: $title, content: $content, tags: $tags) {
+    noteId
+    title
+    content
+    tags {
+      name
+    }
+  }
+}
+
+mutation UpdateNote(
+  $noteId: ID!
+  $title: String
+  $content: String
+  $tags: [String!]!
+) {
+  updateNote(noteId: $noteId, title: $title, content: $content, tags: $tags) {
+    noteId
+    title
+    content
+    tags {
+      name
+    }
+  }
+}
+
+mutation DeleteNote($noteId: ID!) {
+  deleteNote(noteId: $noteId) {
+    noteId
+  }
+}

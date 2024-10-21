@@ -4,7 +4,8 @@ import { DiaryFormComponent } from "@/components/app-components-diary-form";
 import { isAuthenticated, getCurrentUser } from "@/lib/app-lib-auth";
 import Link from "next/link";
 
-export function CreatePage() {
+export async function CreatePage() {
+  const currentUser = await getCurrentUser();
   if (!isAuthenticated()) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -25,7 +26,7 @@ export function CreatePage() {
         <div className="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
           <div className="max-w-md mx-auto">
             <h2 className="text-2xl font-bold mb-4">新規日記投稿</h2>
-            <DiaryFormComponent currentUser={getCurrentUser()} />
+            <DiaryFormComponent currentUser={currentUser} />
           </div>
         </div>
       </div>
