@@ -37,7 +37,7 @@ INSERT INTO users (
     password,
     sex,
     birthday,
-    role_id
+    role
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: GetUser :one
@@ -50,11 +50,20 @@ SELECT
     password,
     sex,
     birthday,
-    role_id,
+    role,
     created_at,
     updated_at
 FROM users
 WHERE user_id = ? LIMIT 1;
+
+-- name: GetUserByEmail :one
+SELECT 
+    user_id,
+    name,
+    email,
+    role
+FROM users
+WHERE email = ? LIMIT 1;
 
 -- name: GetUsers :many
 SELECT 
@@ -66,7 +75,7 @@ SELECT
     password,
     sex,
     birthday,
-    role_id,
+    role,
     created_at,
     updated_at
 FROM users
@@ -80,7 +89,7 @@ SET name = ?,
     sex = ?,
     birthday = ?,
     password = ?,
-    role_id = ?
+    role = ?
 WHERE user_id = ?;
 
 -- name: DeleteUser :exec
@@ -96,38 +105,3 @@ INSERT INTO user_notes (
 -- name: DeleteUserNote :exec
 DELETE FROM user_notes
 WHERE user_id = ? AND note_id = ?;
-
--- name: CreateRole :exec
-INSERT INTO roles (
-    role_id,
-    role_name
-) VALUES (?, ?);
-
--- name: GetRole :one
-SELECT 
-    id,
-    role_id,
-    role_name,
-    created_at,
-    updated_at
-FROM roles
-WHERE role_id = ? LIMIT 1;
-
--- name: GetRoles :many
-SELECT 
-    id,
-    role_id,
-    role_name,
-    created_at,
-    updated_at
-FROM roles
-ORDER BY created_at DESC;
-
--- name: UpdateRole :exec
-UPDATE roles
-SET role_name = ?
-WHERE role_id = ?;
-
--- name: DeleteRole :exec
-DELETE FROM roles
-WHERE role_id = ?;

@@ -24,6 +24,7 @@
     "@graphql-tools/load": "^8.0.2",
     "@graphql-tools/schema": "^10.0.4",
     "apollo-server-express": "^3.13.0",
+    "bcrypt": "^5.1.1",
     "graphql": "^16.8.2",
     "jsonwebtoken": "^9.0.2",
     "ulid": "^2.3.0",

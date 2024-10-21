@@ -1,5 +1,14 @@
 import mysql from 'mysql2/promise';
-import { GetUserRow, getUsers, getUser, updateUser, createUser, deleteUser } from '@/generated/driver/query_sql';
+import {
+	GetUserRow,
+	getUsers,
+	getUser,
+	updateUser,
+	createUser,
+	deleteUser,
+	getUserByEmail,
+	GetUserByEmailRow,
+} from '@/generated/driver/query_sql';
 
 export class UserDao {
 	private connection: mysql.Connection;
@@ -25,7 +34,7 @@ export class UserDao {
 		sex: number;
 		birthday: string;
 		password: string;
-		roleId: string;
+		role: string;
 	}): Promise<void> {
 		try {
 			await updateUser(this.connection, {
@@ -36,7 +45,7 @@ export class UserDao {
 				sex: param.sex,
 				birthday: param.birthday,
 				password: param.password,
-				roleId: param.roleId,
+				role: param.role,
 			});
 		} catch (e) {
 			console.error(e);
@@ -63,7 +72,7 @@ export class UserDao {
 				sex: param.sex,
 				birthday: param.birthday,
 				password: param.password,
-				roleId: param.roleId,
+				role: param.roleId,
 			});
 		} catch (e) {
 			console.error(e);
@@ -78,5 +87,10 @@ export class UserDao {
 			console.error(e);
 			throw new Error('削除に失敗しました');
 		}
+	}
+
+	async getUserByEmail(email: string): Promise<GetUserByEmailRow | null> {
+		const res = await getUserByEmail(this.connection, { email: email });
+		return res;
 	}
 }

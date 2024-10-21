@@ -3,14 +3,14 @@ type PostTag {
 }
 
 type Note {
-  id: ID!
+  noteId: ID!
   title: String!
   content: String!
   tags: [PostTag!]!
 }
 
 type User {
-  id: ID!
+  userId: ID!
   username: String!
   email: String!
   birthday: String
@@ -18,12 +18,6 @@ type User {
   passwordHash: String
   address: String
   role: String!
-}
-
-type Role {
-  id: ID!
-  name: String!
-  permissions: [String!]!
 }
 
 type AuthPayload {
@@ -35,9 +29,6 @@ type Query {
   getUser(id: ID!): User
   getUsers: [User]
 
-  getRole(id: ID!): Role
-  getRoles: [Role]
-
   currentUser: User
 
   getNotes: [Note]
@@ -46,17 +37,13 @@ type Query {
 
 type Mutation {
   createUser(username: String!, email: String!, role: String!, birthday:String!, sex: String!,passwordHash:String!, address:String!): User
-  updateUser(id: ID!, username: String, email: String, role: String,birthday:String!, sex: String!,passwordHash:String!, address:String!): User
-  deleteUser(id: ID!): User
+  updateUser(userId: ID!, username: String, email: String, role: String,birthday:String!, sex: String!,passwordHash:String!, address:String!): User
+  deleteUser(userId: ID!): User
 
-  createRole(name: String!, permissions: [String!]!): Role
-  updateRole(id: ID!, name: String, permissions: [String!]!): Role
-  deleteRole(id: ID!): Role
-
-  login(userId: String, email: String, password: String!): AuthPayload
+  login(email: String!, password: String!): AuthPayload
   logout: Boolean
 
   createNote(title: String!, content: String!, tags: [String!]!): Note
-  updateNote(id: ID!, title: String, content: String, tags: [String!]!): Note
-  deleteNote(id: ID!): Note
+  updateNote(noteId: ID!, title: String, content: String, tags: [String!]!): Note
+  deleteNote(noteId: ID!): Note
 }

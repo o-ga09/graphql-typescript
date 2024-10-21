@@ -3,11 +3,11 @@ CREATE TABLE users (
   user_id varchar(255) UNIQUE NOT NULL,
   name varchar(255) NOT NULL,
   address varchar(255) NOT NULL,
-  email varchar(255) NOT NULL,
+  email varchar(255) UNIQUE NOT NULL,
   password varchar(255) NOT NULL,
   sex integer NOT NULL,
   birthday varchar(255) NOT NULL,
-  role_id varchar(255) NOT NULL,
+  role varchar(255) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
@@ -25,15 +25,6 @@ CREATE TABLE notes (
   PRIMARY KEY (id)
 );
 
-CREATE TABLE roles (
-  id   BIGINT  NOT NULL AUTO_INCREMENT,
-  role_id varchar(255) UNIQUE NOT NULL,
-  role_name varchar(255) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (id)
-);
-
 CREATE TABLE user_notes (
   user_id varchar(255) NOT NULL,
   note_id varchar(255) NOT NULL,
@@ -44,23 +35,16 @@ CREATE TABLE user_notes (
   FOREIGN KEY (note_id) REFERENCES notes (note_id)
 );
 
-INSERT INTO users (user_id, name,address,birthday,sex, email, password,role_id, created_at, updated_at) VALUES ('d4a6e9b6-f079-45c9-b6d0-565cf4280596', 'admin','tokyo','2000-01-30',0, 'hoge@piyo,.com','000', '234546', '2021-01-01 00:00:00', '2021-01-01 00:00:00');
-INSERT INTO users (user_id, name,address,birthday,sex, email, password,role_id, created_at, updated_at) VALUES ('d4a6e9b6-f079-45c9-b6d0-565cf4280597', 'admin','tokyo','2000-01-30',0, 'hoge@piyo,.com','000', '46366436', '2021-01-01 00:00:00', '2021-01-01 00:00:00');
-INSERT INTO users (user_id, name,address,birthday,sex, email, password,role_id, created_at, updated_at) VALUES ('d4a6e9b6-f079-45c9-b6d0-565cf4280598', 'admin','tokyo','2000-01-30',0, 'hoge@piyo,.com','000', '46346', '2021-01-01 00:00:00', '2021-01-01 00:00:00');
-INSERT INTO users (user_id, name,address,birthday,sex, email, password,role_id, created_at, updated_at) VALUES ('d4a6e9b6-f079-45c9-b6d0-565cf4280599', 'admin','tokyo','2000-01-30',0, 'hoge@piyo,.com','000', '456357', '2021-01-01 00:00:00', '2021-01-01 00:00:00');
-INSERT INTO users (user_id, name,address,birthday,sex, email, password,role_id, created_at, updated_at) VALUES ('d4a6e9b6-f079-45c9-b6d0-565cf4280510', 'admin','tokyo','2000-01-30',0, 'hoge@piyo,.com','000', '357576575', '2021-01-01 00:00:00', '2021-01-01 00:00:00');
-INSERT INTO users (user_id, name,address,birthday,sex, email, password,role_id, created_at, updated_at) VALUES ('d4a6e9b6-f079-45c9-b6d0-565cf4280512', 'admin','tokyo','2000-01-30',0, 'hoge@piyo,.com','000', '337574634643', '2021-01-01 00:00:00', '2021-01-01 00:00:00');
-INSERT INTO users (user_id, name,address,birthday,sex, email, password,role_id, created_at, updated_at) VALUES ('d4a6e9b6-f079-45c9-b6d0-565cf4280513', 'admin','tokyo','2000-01-30',0, 'hoge@piyo,.com','000', '347345743', '2021-01-01 00:00:00', '2021-01-01 00:00:00');
-INSERT INTO notes (note_id, title,tags, content, created_at, updated_at) VALUES ('d4a6e9b6-f079-45c9-b6d0-565cf4280522', 'Welcome to Note App','tag_a,tag_b,tag_c', 'This is a note app', '2021-01-01 00:00:00', '2021-01-01 00:00:00');
-INSERT INTO notes (note_id, title,tags, content, created_at, updated_at) VALUES ('d4a6e9b6-f079-45c9-b6d0-565cf4280523', 'Welcome to Note App','tag_a,tag_b,tag_c', 'This is a note app', '2021-01-01 00:00:00', '2021-01-01 00:00:00');
-INSERT INTO notes (note_id, title,tags, content, created_at, updated_at) VALUES ('d4a6e9b6-f079-45c9-b6d0-565cf4280524', 'Welcome to Note App','tag_a,tag_b,tag_c', 'This is a note app', '2021-01-01 00:00:00', '2021-01-01 00:00:00');
-INSERT INTO notes (note_id, title,tags, content, created_at, updated_at) VALUES ('d4a6e9b6-f079-45c9-b6d0-565cf4280525', 'Welcome to Note App','tag_a,tag_b,tag_c', 'This is a note app', '2021-01-01 00:00:00', '2021-01-01 00:00:00');
-INSERT INTO notes (note_id, title,tags, content, created_at, updated_at) VALUES ('d4a6e9b6-f079-45c9-b6d0-565cf4280527', 'Welcome to Note App','tag_a,tag_b,tag_c', 'This is a note app', '2021-01-01 00:00:00', '2021-01-01 00:00:00');
-INSERT INTO notes (note_id, title,tags, content, created_at, updated_at) VALUES ('d4a6e9b6-f079-45c9-b6d0-565cf4280528', 'Welcome to Note App','tag_a,tag_b,tag_c', 'This is a note app', '2021-01-01 00:00:00', '2021-01-01 00:00:00');
-INSERT INTO notes (note_id, title,tags, content, created_at, updated_at) VALUES ('d4a6e9b6-f079-45c9-b6d0-565cf4280529', 'Welcome to Note App','tag_a,tag_b,tag_c', 'This is a note app', '2021-01-01 00:00:00', '2021-01-01 00:00:00');
-INSERT INTO notes (note_id, title,tags, content, created_at, updated_at) VALUES ('d4a6e9b6-f079-45c9-b6d0-565cf4280521', 'Welcome to Note App','tag_a,tag_b,tag_c', 'This is a note app', '2021-01-01 00:00:00', '2021-01-01 00:00:00');
-INSERT INTO user_notes (user_id, note_id) VALUES ('d4a6e9b6-f079-45c9-b6d0-565cf4280596', 'd4a6e9b6-f079-45c9-b6d0-565cf4280522');
-INSERT INTO user_notes (user_id, note_id) VALUES ('d4a6e9b6-f079-45c9-b6d0-565cf4280596', 'd4a6e9b6-f079-45c9-b6d0-565cf4280523');
-INSERT INTO user_notes (user_id, note_id) VALUES ('d4a6e9b6-f079-45c9-b6d0-565cf4280596', 'd4a6e9b6-f079-45c9-b6d0-565cf4280524');
-INSERT INTO user_notes (user_id, note_id) VALUES ('d4a6e9b6-f079-45c9-b6d0-565cf4280596', 'd4a6e9b6-f079-45c9-b6d0-565cf4280525');
-INSERT INTO user_notes (user_id, note_id) VALUES ('d4a6e9b6-f079-45c9-b6d0-565cf4280596', 'd4a6e9b6-f079-45c9-b6d0-565cf4280527');
+-- user
+INSERT INTO users (user_id, name, address, email, password, sex, birthday, role) VALUES ('user_id_1', 'test_user_1', '東京都', 'test-user-01@example.com', '$2b$10$GssY.7nDerKnybhYwAJBE.GQbhxatGa9cJOlyAzF1nVFAz2dghjyK', 1, '1990-01-01', 'user');
+INSERT INTO users (user_id, name, address, email, password, sex, birthday, role) VALUES ('user_id_2', 'test_user_2', '大阪府', 'test-user-02@example.com', '$2b$10$1m8es18X8eCKa8VIUvwTnuJ4Vs.F40ECXEj/bpJw1b23qT9hqs8ey', 0, '1992-03-14', 'user');
+INSERT INTO users (user_id, name, address, email, password, sex, birthday, role) VALUES ('user_id_3', 'test_user_3', '北海道', 'test-user-03@example.com', '$2b$10$P11WBf9/1kUVL0xZiZu5QeKNIu89bHbIvYzBhffRTbGRYaQ4rwEkC', 1, '1990-10-26', 'admin');
+-- note
+INSERT INTO notes (note_id, title, tags, content) VALUES ('note_id_1', 'test note 1', 'test', 'test note 1');
+INSERT INTO notes (note_id, title, tags, content) VALUES ('note_id_2', 'test note 2', 'タイトル', 'コンテンツコンテンツコンテンツコンテンツコンテンツコンテンツコンテンツコンテンツコンテンツコンテンツコンテンツコンテンツコンテンツ');
+INSERT INTO notes (note_id, title, tags, content) VALUES ('note_id_3', 'test note 3', '## Title', 'コンテンツ　コンテンツ　コンテンツ\nコンテンツ　コンテンツ　コンテンツ\nコンテンツ　コンテンツ　コンテンツ\n');
+-- note owned by user
+INSERT INTO user_notes (user_id, note_id) VALUES ('user_id_1', 'note_id_1');
+INSERT INTO user_notes (user_id, note_id) VALUES ('user_id_2', 'note_id_2');
+INSERT INTO user_notes (user_id, note_id) VALUES ('user_id_3', 'note_id_3');
+

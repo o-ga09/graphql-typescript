@@ -29,9 +29,9 @@ const AplloServer = new ApolloServer({
 await AplloServer.start();
 app.use(authMiddleware);
 app.use(requestLoggerMiddleware);
+app.use(cors());
 app.use(
 	'/graphql',
-	cors<cors.CorsRequest>(),
 	express.json(),
 	expressMiddleware(AplloServer, {
 		context: async ({ req }) => {

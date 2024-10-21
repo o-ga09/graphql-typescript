@@ -3,11 +3,11 @@ CREATE TABLE users (
   user_id varchar(255) UNIQUE NOT NULL,
   name varchar(255) NOT NULL,
   address varchar(255) NOT NULL,
-  email varchar(255) NOT NULL,
+  email varchar(255) UNIQUE NOT NULL,
   password varchar(255) NOT NULL,
   sex integer NOT NULL,
   birthday varchar(255) NOT NULL,
-  role_id varchar(255) NOT NULL,
+  role varchar(255) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
@@ -22,15 +22,6 @@ CREATE TABLE notes (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   deleted_at TIMESTAMP DEFAULT NULL,
-  PRIMARY KEY (id)
-);
-
-CREATE TABLE roles (
-  id   BIGINT  NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  role_id varchar(255) UNIQUE NOT NULL,
-  role_name varchar(255) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
 );
 

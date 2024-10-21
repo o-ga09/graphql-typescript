@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-empty-pattern */
-import { AuthPayload, Note, PostTag, Resolvers, Role, User } from '@/generated/graphql';
+import { AuthPayload, Note, PostTag, Resolvers, User } from '@/generated/graphql';
 import fs from 'fs';
 import { NoteDao } from './dao/note';
 import { UserDao } from './dao/user';
 import { generateUlid } from './generateID/generateid';
 import jwt from 'jsonwebtoken';
-import { RoleDao } from './dao/role';
-import { GetUserRow } from '@/generated/driver/query_sql';
+import { GetUserByEmailRow, GetUserRow } from '@/generated/driver/query_sql';
 
 export const typeDefs = fs.readFileSync('./schema.graphql', {
 	encoding: 'utf8',
@@ -19,14 +18,14 @@ export const resolvers: Resolvers = {
 			const userDao = new UserDao(dbconnection);
 			const user = await userDao.getUserDetail(id);
 			const resUser: User = {
-				id: user.userId,
+				userId: user.userId,
 				username: user.name,
 				email: user.email,
-				role: user.address,
 				passwordHash: user.password,
 				sex: String(user.sex),
 				birthday: user.birthday,
 				address: user.address,
+				role: user.role,
 			};
 			return resUser;
 		},
@@ -35,35 +34,17 @@ export const resolvers: Resolvers = {
 			const users = await userDao.getUserList();
 			const resUsers: User[] = users.map((user) => {
 				return {
-					id: user.userId,
+					userId: user.userId,
 					username: user.name,
 					email: user.email,
-					role: user.address,
+					birthday: user.birthday,
+					sex: String(user.sex),
+					passwordHash: user.password,
+					address: user.address,
+					role: user.role,
 				};
 			});
 			return resUsers;
-		},
-		getRole: async (_, { id }, { dbconnection }) => {
-			const roleDao = new RoleDao(dbconnection);
-			const role = await roleDao.getRoleDetail(id);
-			const resRole: Role = {
-				id: role.roleId,
-				name: role.roleName,
-				permissions: [],
-			};
-			return resRole;
-		},
-		getRoles: async (_, __, { dbconnection }) => {
-			const roleDao = new RoleDao(dbconnection);
-			const role = await roleDao.getRoleList();
-			const resRoles: Role[] = role.map((role) => {
-				return {
-					id: role.roleId,
-					name: role.roleName,
-					permissions: [],
-				};
-			});
-			return resRoles;
 		},
 		getNoteById: async (_, { id }, { dbconnection }) => {
 			const noteDao = new NoteDao(dbconnection);
@@ -72,7 +53,7 @@ export const resolvers: Resolvers = {
 				return { name: tag };
 			});
 			const resNote: Note = {
-				id: note.noteId,
+				noteId: note.noteId,
 				title: note.title,
 				content: note.content,
 				tags: posttag,
@@ -80,7 +61,6 @@ export const resolvers: Resolvers = {
 			return resNote;
 		},
 		getNotes: async (_, __, { userId, dbconnection }) => {
-			console.log(userId);
 			const noteDao = new NoteDao(dbconnection);
 			const note = await noteDao.getNoteList(userId);
 			const resNotes: Note[] = note.map((note) => {
@@ -88,13 +68,32 @@ export const resolvers: Resolvers = {
 					return { name: tag };
 				});
 				return {
-					id: note.noteId,
+					noteId: note.noteId,
 					title: note.title,
 					content: note.content,
 					tags: posttag,
 				};
 			});
 			return resNotes;
+		},
+		currentUser: async (_, __, { userId, dbconnection }) => {
+			const userDao = new UserDao(dbconnection);
+			const user = await userDao.getUserDetail(userId);
+
+			if (!user) {
+				throw new Error('User not found');
+			}
+			const resUser: User = {
+				userId: user.userId,
+				username: user.name,
+				email: user.email,
+				role: user.address,
+				passwordHash: user.password,
+				sex: user.sex.toString(),
+				birthday: user.birthday,
+				address: user.address,
+			};
+			return resUser;
 		},
 	},
 	Mutation: {
@@ -113,7 +112,7 @@ export const resolvers: Resolvers = {
 			});
 			const createdUser = await userDao.getUserDetail(userId);
 			const res: User = {
-				id: createdUser.userId,
+				userId: createdUser.userId,
 				username: createdUser.name,
 				email: createdUser.email,
 				role: createdUser.address,
@@ -121,19 +120,6 @@ export const resolvers: Resolvers = {
 				sex: String(createdUser.sex),
 				passwordHash: createdUser.password,
 				address: createdUser.address,
-			};
-			return res;
-		},
-		createRole: async (_, { name, permissions }, { dbconnection }) => {
-			const roleDao = new RoleDao(dbconnection);
-			const roleId = await roleDao.createRole({
-				roleName: name,
-			});
-			const createdRole = await roleDao.getRoleDetail(roleId);
-			const res: Role = {
-				id: createdRole.roleId,
-				name: createdRole.roleName,
-				permissions: [],
 			};
 			return res;
 		},
@@ -151,7 +137,7 @@ export const resolvers: Resolvers = {
 				return { name: tag };
 			});
 			const res: Note = {
-				id: createdNote.noteId,
+				noteId: createdNote.noteId,
 				title: createdNote.title,
 				content: createdNote.content,
 				tags: posttag,
@@ -159,25 +145,29 @@ export const resolvers: Resolvers = {
 			return res;
 		},
 
-		updateUser: async (_, { id, username, email, role, birthday, sex, passwordHash, address }, { dbconnection }) => {
+		updateUser: async (
+			_,
+			{ userId, username, email, role, birthday, sex, passwordHash, address },
+			{ dbconnection }
+		) => {
 			const userDao = new UserDao(dbconnection);
-			const user = await userDao.getUserDetail(id);
+			const user = await userDao.getUserDetail(userId);
 			await userDao.updateUser({
-				userId: id ? id : user.userId,
+				userId: userId ? userId : user.userId,
 				name: username ? username : user.name,
 				email: email ? email : user.email,
 				address: address ? address : user.address,
 				sex: Number(sex) ? Number(sex) : user.sex,
 				birthday: birthday ? birthday : user.birthday,
 				password: passwordHash ? passwordHash : user.password,
-				roleId: role ? role : user.roleId,
+				role: role ? role : user.role,
 			});
-			const updatedUser = await userDao.getUserDetail(id);
+			const updatedUser = await userDao.getUserDetail(userId);
 			const res: User = {
-				id: updatedUser.userId,
+				userId: updatedUser.userId,
 				username: updatedUser.name,
 				email: updatedUser.email,
-				role: updatedUser.roleId,
+				role: updatedUser.role,
 				birthday: updatedUser.birthday,
 				sex: String(updatedUser.sex),
 				passwordHash: updatedUser.password,
@@ -185,36 +175,21 @@ export const resolvers: Resolvers = {
 			};
 			return res;
 		},
-		updateRole: async (_, { id, name, permissions }, { dbconnection }) => {
-			const roleDao = new RoleDao(dbconnection);
-			const role = await roleDao.getRoleDetail(id);
-			await roleDao.updateRole({
-				roleId: id ? id : role.roleId,
-				roleName: name ? name : role.roleName,
-			});
-			const updatedRole = await roleDao.getRoleDetail(id);
-			const res: Role = {
-				id: updatedRole.roleId,
-				name: updatedRole.roleName,
-				permissions: [],
-			};
-			return res;
-		},
-		updateNote: async (_, { id, title, content, tags }, { dbconnection }) => {
+		updateNote: async (_, { noteId, title, content, tags }, { dbconnection }) => {
 			const noteDao = new NoteDao(dbconnection);
-			const note = await noteDao.getNoteDetail(id);
+			const note = await noteDao.getNoteDetail(noteId);
 			await noteDao.updateNote({
-				noteId: id ? id : note.noteId,
+				noteId: noteId ? noteId : note.noteId,
 				title: title ? title : note.title,
 				tags: tags.join(',') ? tags.join(',') : note.tags,
 				content: content ? content : note.content,
 			});
-			const updatedNote = await noteDao.getNoteDetail(id);
+			const updatedNote = await noteDao.getNoteDetail(noteId);
 			const posttag: PostTag[] = updatedNote.tags.split(',').map((tag) => {
 				return { name: tag };
 			});
 			const res: Note = {
-				id: updatedNote.noteId,
+				noteId: updatedNote.noteId,
 				title: updatedNote.title,
 				content: updatedNote.content,
 				tags: posttag,
@@ -222,38 +197,27 @@ export const resolvers: Resolvers = {
 			return res;
 		},
 
-		deleteUser: async (_, { id }, { dbconnection }) => {
+		deleteUser: async (_, { userId }, { dbconnection }) => {
 			const userDao = new UserDao(dbconnection);
-			await userDao.deleteUser(id);
-			const deletedUser = await userDao.getUserDetail(id);
+			await userDao.deleteUser(userId);
+			const deletedUser = await userDao.getUserDetail(userId);
 			const res: User = {
-				id: deletedUser.userId,
+				userId: deletedUser.userId,
 				username: deletedUser.name,
 				email: deletedUser.email,
 				role: deletedUser.address,
 			};
 			return res;
 		},
-		deleteRole: async (_, { id }, { dbconnection }) => {
-			const roleDao = new RoleDao(dbconnection);
-			await roleDao.deleteRole(id);
-			const deletedRole = await roleDao.getRoleDetail(id);
-			const res: Role = {
-				id: deletedRole.roleId,
-				name: deletedRole.roleName,
-				permissions: [],
-			};
-			return res;
-		},
-		deleteNote: async (_, { id }, { dbconnection }) => {
+		deleteNote: async (_, { noteId }, { dbconnection }) => {
 			const noteDao = new NoteDao(dbconnection);
-			await noteDao.deleteNote(id);
-			const deletedNote = await noteDao.getNoteDetail(id);
+			await noteDao.deleteNote(noteId);
+			const deletedNote = await noteDao.getNoteDetail(noteId);
 			const posttag: PostTag[] = deletedNote.tags.split(',').map((tag) => {
 				return { name: tag };
 			});
 			const res: Note = {
-				id: deletedNote.noteId,
+				noteId: deletedNote.noteId,
 				title: deletedNote.title,
 				content: deletedNote.content,
 				tags: posttag,
@@ -261,31 +225,30 @@ export const resolvers: Resolvers = {
 			return res;
 		},
 
-		login: async (_, { userId, email, password }, { dbconnection }) => {
+		login: async (_, { email, password }, { dbconnection }) => {
 			const userDao = new UserDao(dbconnection);
-			let resuser: GetUserRow;
+			let resuser: GetUserByEmailRow | null = null;
 
-			if (!userId || userId !== '') {
-				resuser = await userDao.getUserDetail(userId);
-			} else {
-				resuser = await userDao.getUserDetail(email);
+			resuser = await userDao.getUserByEmail(email);
+			if (!resuser) {
+				throw new Error('Invalid email or password');
 			}
 
 			const user: User = {
-				id: resuser.userId,
+				userId: resuser.userId,
 				username: resuser.name,
 				email: resuser.email,
-				role: resuser.roleId,
+				role: resuser.role,
 			};
-			const authUser = await authenticateUser(userId, email, password, user);
-			const token = jwt.sign({ id: authUser.id }, 'your_secret_key', {
+			const authUser = await authenticateUser(email, password, user);
+			const token = jwt.sign({ id: authUser.id }, process.env.AUTH_KEY, {
 				expiresIn: 3600,
 				algorithm: 'HS256',
 			});
 			const res: AuthPayload = {
 				token: token,
 				user: {
-					id: authUser.id,
+					userId: authUser.id,
 					username: authUser.username,
 					email: authUser.email,
 					role: authUser.role,
@@ -300,17 +263,12 @@ export const resolvers: Resolvers = {
 };
 
 async function authenticateUser(
-	userId: string,
 	email: string,
 	password: string,
 	user: User
 ): Promise<{ id: string; username: string; email: string; role: string }> {
 	return new Promise((resolve, reject) => {
-		if (userId === '' || email === '' || password === '') {
-			reject('Invalid email or password');
-		}
-
-		if (userId && user.id !== userId) {
+		if (email === '' || password === '') {
 			reject('Invalid email or password');
 		}
 
@@ -321,6 +279,6 @@ async function authenticateUser(
 		// if (user.passwordHash !== password) {
 		// 	reject('Invalid email or password');
 		// }
-		resolve({ id: user.id, username: user.username, email: user.email, role: user.role });
+		resolve({ id: user.userId, username: user.username, email: user.email, role: user.role });
 	});
 }
