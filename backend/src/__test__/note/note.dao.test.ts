@@ -3,10 +3,12 @@ import { GenericContainer, Wait } from 'testcontainers';
 import { NoteDao } from '@/lib/dao/note';
 import { createPool } from 'mysql2/promise';
 import path from 'path';
+import { UserDao } from '@/lib/dao/user';
 
 describe('NoteDao Tests', () => {
 	let container;
 	let noteDao: NoteDao;
+	let userDao: UserDao;
 
 	beforeAll(async () => {
 		container = await new GenericContainer('mysql')
@@ -44,23 +46,15 @@ describe('NoteDao Tests', () => {
 		const connection = await pool.getConnection();
 
 		// テストデータ挿入
-		await connection.query(`
-			INSERT INTO users (user_id, name, email, password, address, sex, birthday) VALUES
-			('999', 'testuser', 'hoge@example.com', 'xxx', 'yyy', 1, '2024-09-18');
-		`);
-
-		await connection.query(`
-			INSERT INTO notes (note_id, title, tags, content) VALUES
-			('1', 'Test Note', 'test', 'This is a test note');
-		`);
-		await connection.query(`
-			INSERT INTO user_notes (
-			    user_id,
- 				note_id
-			) VALUES ('999', '1');
-		`);
-
 		noteDao = new NoteDao(connection);
+		userDao = new UserDao(connection);
+		await userDao.createUser({ ...defaultUser, userId: 'test-1' });
+		await userDao.createUser({ ...defaultUser, userId: 'test-2' });
+		await userDao.createUser({ ...defaultUser, userId: 'test-3' });
+		await userDao.createUser({ ...defaultUser, userId: 'test-4' });
+		await noteDao.createNote({ ...defaultNote, userId: 'test-1' });
+		await noteDao.createNote({ ...defaultNote, userId: 'test-2' });
+		await noteDao.createNote({ ...defaultNote, userId: 'test-3' });
 	});
 
 	afterAll(async () => {
@@ -74,7 +68,7 @@ describe('NoteDao Tests', () => {
 			title: 'Test Note',
 			tags: 'test',
 			content: 'This is a test note',
-			userId: 'd4a6e9b6-f079-45c9-b6d0-565cf4280596',
+			userId: 'test-4',
 		};
 		const newNoteId = await noteDao.createNote(note);
 		const result = await noteDao.getNoteDetail(newNoteId);
@@ -85,37 +79,64 @@ describe('NoteDao Tests', () => {
 	});
 
 	test('getNoteList should return a list of notes', async () => {
-		const notes = await noteDao.getNoteList('d4a6e9b6-f079-45c9-b6d0-565cf4280596');
-		expect(notes.length).toBeGreaterThan(0);
+		const notes = await noteDao.getNoteList('test-1');
+		expect(notes).toHaveLength(1);
 	});
 
 	test('getNoteDetail should return a note detail', async () => {
-		const note = await noteDao.getNoteDetail('d4a6e9b6-f079-45c9-b6d0-565cf4280522');
+		const notes = await noteDao.getNoteList('test-1');
+		const noteId = notes[0].noteId;
+		const note = await noteDao.getNoteDetail(noteId);
 		expect(note).toEqual({
-			id: 1,
-			noteId: 'd4a6e9b6-f079-45c9-b6d0-565cf4280522',
-			title: 'Welcome to Note App',
-			tags: 'tag_a,tag_b,tag_c',
-			content: 'This is a note app',
-			createdAt: new Date('2020-12-31T15:00:00.000Z'),
-			updatedAt: new Date('2020-12-31T15:00:00.000Z'),
+			id: notes[0].id,
+			noteId: notes[0].noteId,
+			title: notes[0].title,
+			tags: notes[0].tags,
+			content: notes[0].content,
+			createdAt: notes[0].createdAt,
+			updatedAt: notes[0].updatedAt,
+			userId: notes[0].userId,
+			name: notes[0].name,
+			displayname: notes[0].displayname,
 		});
 	});
 
 	test('updateNote should update a note', async () => {
-		const updatedNote = { noteId: '1', title: 'Updated Note', tags: 'updated', content: 'This is an updated note' };
-		await noteDao.updateNote(updatedNote);
-		const result = await noteDao.getNoteDetail('1');
+		const before = await noteDao.getNoteList('test-1');
+		await noteDao.updateNote({
+			title: before[0].title,
+			tags: before[0].tags,
+			content: 'This is an updated note',
+			noteId: before[0].noteId,
+		});
+		const result = await noteDao.getNoteDetail(before[0].noteId);
 		expect(result.id).toBeGreaterThan(0);
-		expect(result.noteId).toBe(updatedNote.noteId);
-		expect(result.title).toBe(updatedNote.title);
-		expect(result.tags).toBe(updatedNote.tags);
-		expect(result.content).toBe(updatedNote.content);
+		expect(result.noteId).toBe(before[0].noteId);
+		expect(result.title).toBe(before[0].title);
+		expect(result.tags).toBe(before[0].tags);
+		expect(result.content).toBe('This is an updated note');
 	});
 
 	test('deleteNote should delete a note', async () => {
-		await noteDao.deleteNote('1');
-		const result = await noteDao.getNoteDetail('1');
+		const notes = await noteDao.getNoteList('test-2');
+		await noteDao.deleteNote(notes[0].noteId);
+		const result = await noteDao.getNoteDetail(notes[0].noteId);
 		expect(result).toBeNull();
 	});
 });
+
+// テストデータ
+const defaultUser = {
+	userId: 'd4a6e9b6-f079-45c9-b6d0-565cf4280596',
+	name: 'testuser',
+	displayname: 'Test User',
+};
+
+const defaultNote = {
+	title: 'Welcome to Note App',
+	tags: 'tag_a,tag_b,tag_c',
+	content: 'This is a note app',
+	createdAt: '2020-12-31T15:00:00.000Z',
+	updatedAt: '2020-12-31T15:00:00.000Z',
+	userId: 'd4a6e9b6-f079-45c9-b6d0-565cf4280596',
+};

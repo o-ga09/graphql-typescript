@@ -44,12 +44,10 @@ describe('UserDao Tests', () => {
 		const connection = await pool.getConnection();
 
 		// テストデータ挿入
-		await connection.query(`
-            INSERT INTO users (user_id, name, email, address, sex, birthday, password) VALUES
-                ('1', 'Test User', 'test@example.com', '123 Test St', 1, '1990-01-01', 'password');
-        `);
-
 		userDao = new UserDao(connection);
+		await userDao.createUser({ ...defaultUser, userId: 'test-1' });
+		await userDao.createUser({ ...defaultUser, userId: 'test-2' });
+		await userDao.createUser({ ...defaultUser, userId: 'test-3' });
 	});
 
 	afterAll(async () => {
@@ -60,67 +58,53 @@ describe('UserDao Tests', () => {
 
 	test('createUser should create a user', async () => {
 		const user = {
-			userId: '2',
+			userId: 'test-4',
 			name: 'Another User',
-			email: 'another@example.com',
-			address: '456 Another St',
-			sex: 2,
-			birthday: '1992-02-02',
-			password: 'password',
+			displayname: 'Another User',
 		};
 		await userDao.createUser(user);
-		const result = await userDao.getUserDetail('2');
+		const result = await userDao.getUserDetail('test-4');
 		expect(result.userId).toEqual(user.userId);
-		expect(result.name).toEqual(user.name);
-		expect(result.email).toEqual(user.email);
-		expect(result.address).toEqual(user.address);
-		expect(result.birthday).toEqual(user.birthday);
-		expect(result.password).toEqual(user.password);
-		expect(result.sex).toEqual(user.sex);
+		expect(result.name).toEqual(user.displayname);
 	});
 
 	test('getUserList should return a list of users', async () => {
 		const users = await userDao.getUserList();
-		expect(users.length).toBeGreaterThan(0);
+		expect(users).toHaveLength(4);
 	});
 
 	test('getUserDetail should return a user detail', async () => {
-		const user = await userDao.getUserDetail('1');
+		const user = await userDao.getUserDetail('test-1');
 		expect(user.id).toBeGreaterThan(0);
-		expect(user.userId).toEqual('1');
+		expect(user.userId).toEqual('test-1');
 		expect(user.name).toEqual('Test User');
-		expect(user.email).toEqual('test@example.com');
-		expect(user.address).toEqual('123 Test St');
-		expect(user.sex).toEqual(1);
-		expect(user.birthday).toEqual('1990-01-01');
-		expect(user.password).toEqual('password');
+		expect(user.displayname).toEqual('Test User');
 	});
 
 	test('updateUser should update a user', async () => {
 		const updatedUser = {
-			userId: '1',
+			userId: 'test-2',
 			name: 'Updated User',
-			email: 'updated@example.com',
-			address: '789 Updated St',
-			sex: 1,
-			birthday: '1990-01-01',
-			password: 'newpassword',
+			displayname: 'Updated User',
 		};
 		await userDao.updateUser(updatedUser);
-		const result = await userDao.getUserDetail('1');
+		const result = await userDao.getUserDetail('test-2');
 		expect(result.id).toBeGreaterThan(0);
 		expect(result.userId).toEqual(updatedUser.userId);
 		expect(result.name).toEqual(updatedUser.name);
-		expect(result.email).toEqual(updatedUser.email);
-		expect(result.address).toEqual(updatedUser.address);
-		expect(result.birthday).toEqual(updatedUser.birthday);
-		expect(result.password).toEqual(updatedUser.password);
-		expect(result.sex).toEqual(updatedUser.sex);
+		expect(result.displayname).toEqual(updatedUser.displayname);
 	});
 
 	test('deleteUser should delete a user', async () => {
-		await userDao.deleteUser('1');
+		await userDao.deleteUser('test-1');
 		const result = await userDao.getUserDetail('1');
 		expect(result).toBeNull();
 	});
 });
+
+// テストデータ
+const defaultUser = {
+	userId: '1',
+	name: 'Test User',
+	displayname: 'Test User',
+};
