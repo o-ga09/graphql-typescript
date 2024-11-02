@@ -9,7 +9,6 @@ import { expressMiddleware } from '@apollo/server/express4';
 import { closeConnection, createConnection, dbconnection, getConnection } from '@/db';
 import { logger } from '@/lib/middleware/logger';
 import dotenv from 'dotenv';
-import { authMiddleware } from './lib/middleware/auth';
 import { requestLoggerMiddleware } from './lib/middleware/requestlogger';
 dotenv.config(); // dotenvパッケージを使用して環境変数を読み込む
 
@@ -27,17 +26,15 @@ const AplloServer = new ApolloServer({
 });
 
 await AplloServer.start();
-app.use(authMiddleware);
 app.use(requestLoggerMiddleware);
 app.use(cors());
 app.use(
 	'/graphql',
 	express.json(),
 	expressMiddleware(AplloServer, {
-		context: async ({ req }) => {
-			const userId = req.user || '';
+		context: async ({ res }) => {
 			await getConnection();
-			return { userId, dbconnection };
+			return { res, dbconnection };
 		},
 	})
 );

@@ -1,14 +1,5 @@
 import mysql from 'mysql2/promise';
-import {
-	GetUserRow,
-	getUsers,
-	getUser,
-	updateUser,
-	createUser,
-	deleteUser,
-	getUserByEmail,
-	GetUserByEmailRow,
-} from '@/generated/driver/query_sql';
+import { GetUserRow, getUsers, getUser, updateUser, createUser, deleteUser } from '@/generated/driver/query_sql';
 
 export class UserDao {
 	private connection: mysql.Connection;
@@ -26,26 +17,12 @@ export class UserDao {
 		return res;
 	}
 
-	async updateUser(param: {
-		userId: string;
-		name: string;
-		email: string;
-		address: string;
-		sex: number;
-		birthday: string;
-		password: string;
-		role: string;
-	}): Promise<void> {
+	async updateUser(param: { userId: string; name: string; displayname: string }): Promise<void> {
 		try {
 			await updateUser(this.connection, {
 				userId: param.userId,
 				name: param.name,
-				email: param.email,
-				address: param.address,
-				sex: param.sex,
-				birthday: param.birthday,
-				password: param.password,
-				role: param.role,
+				displayname: param.name,
 			});
 		} catch (e) {
 			console.error(e);
@@ -53,26 +30,12 @@ export class UserDao {
 		}
 	}
 
-	async createUser(param: {
-		userId: string;
-		name: string;
-		email: string;
-		address: string;
-		sex: number;
-		birthday: string;
-		password: string;
-		roleId: string;
-	}): Promise<void> {
+	async createUser(param: { userId: string; name: string; displayname: string }): Promise<void> {
 		try {
 			await createUser(this.connection, {
 				userId: param.userId,
 				name: param.name,
-				email: param.email,
-				address: param.address,
-				sex: param.sex,
-				birthday: param.birthday,
-				password: param.password,
-				role: param.roleId,
+				displayname: param.name,
 			});
 		} catch (e) {
 			console.error(e);
@@ -87,10 +50,5 @@ export class UserDao {
 			console.error(e);
 			throw new Error('削除に失敗しました');
 		}
-	}
-
-	async getUserByEmail(email: string): Promise<GetUserByEmailRow | null> {
-		const res = await getUserByEmail(this.connection, { email: email });
-		return res;
 	}
 }
