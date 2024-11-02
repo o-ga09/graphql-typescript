@@ -3,8 +3,10 @@ import mysql, { RowDataPacket } from "mysql2/promise";
 type Client = mysql.Connection | mysql.Pool;
 
 export const getNoteQuery = `-- name: GetNote :one
-SELECT id, note_id, title, tags, content, created_at, updated_at FROM notes
-WHERE note_id = ? AND deleted_at IS NULL LIMIT 1`;
+SELECT notes.id, notes.note_id, title, tags, content, notes.created_at, notes.updated_at, users.user_id, users.name, users.displayname FROM notes
+JOIN user_notes ON notes.note_id = user_notes.note_id
+JOIN users ON users.user_id = user_notes.user_id
+WHERE user_notes.note_id = ? AND notes.deleted_at IS NULL LIMIT 1`;
 
 export interface GetNoteArgs {
     noteId: string;
@@ -18,6 +20,9 @@ export interface GetNoteRow {
     content: string;
     createdAt: Date | null;
     updatedAt: Date | null;
+    userId: string;
+    name: string;
+    displayname: string;
 }
 
 export async function getNote(client: Client, args: GetNoteArgs): Promise<GetNoteRow | null> {
@@ -37,13 +42,17 @@ export async function getNote(client: Client, args: GetNoteArgs): Promise<GetNot
         tags: row[3],
         content: row[4],
         createdAt: row[5],
-        updatedAt: row[6]
+        updatedAt: row[6],
+        userId: row[7],
+        name: row[8],
+        displayname: row[9]
     };
 }
 
 export const getNotesQuery = `-- name: GetNotes :many
-SELECT id, notes.note_id, title, tags, content, notes.created_at, notes.updated_at FROM notes
+SELECT notes.id, notes.note_id, title, tags, content, notes.created_at, notes.updated_at, users.user_id, users.name, users.displayname FROM notes
 JOIN user_notes ON notes.note_id = user_notes.note_id
+JOIN users ON users.user_id = user_notes.user_id
 WHERE user_notes.user_id = ? AND notes.deleted_at IS NULL
 ORDER BY created_at DESC`;
 
@@ -59,6 +68,9 @@ export interface GetNotesRow {
     content: string;
     createdAt: Date | null;
     updatedAt: Date | null;
+    userId: string;
+    name: string;
+    displayname: string;
 }
 
 export async function getNotes(client: Client, args: GetNotesArgs): Promise<GetNotesRow[]> {
@@ -75,7 +87,10 @@ export async function getNotes(client: Client, args: GetNotesArgs): Promise<GetN
             tags: row[3],
             content: row[4],
             createdAt: row[5],
-            updatedAt: row[6]
+            updatedAt: row[6],
+            userId: row[7],
+            name: row[8],
+            displayname: row[9]
         };
     });
 }
@@ -107,7 +122,7 @@ UPDATE notes
 SET title = ?,
     tags = ?,
     content = ?
-WHERE note_id = ?`;
+WHERE note_id = ? AND notes.deleted_at IS NULL`;
 
 export interface UpdateNoteArgs {
     title: string;
@@ -126,7 +141,7 @@ export async function updateNote(client: Client, args: UpdateNoteArgs): Promise<
 export const deleteNoteQuery = `-- name: DeleteNote :exec
 UPDATE notes
 SET deleted_at = NOW()
-WHERE note_id = ?`;
+WHERE notes.note_id = ?`;
 
 export interface DeleteNoteArgs {
     noteId: string;
@@ -143,29 +158,19 @@ export const createUserQuery = `-- name: CreateUser :exec
 INSERT INTO users (
     user_id,
     name,
-    email,
-    address,
-    password,
-    sex,
-    birthday,
-    role
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+    displayname
+) VALUES (?, ?, ?)`;
 
 export interface CreateUserArgs {
     userId: string;
     name: string;
-    email: string;
-    address: string;
-    password: string;
-    sex: number;
-    birthday: string;
-    role: string;
+    displayname: string;
 }
 
 export async function createUser(client: Client, args: CreateUserArgs): Promise<void> {
     await client.query({
         sql: createUserQuery,
-        values: [args.userId, args.name, args.email, args.address, args.password, args.sex, args.birthday, args.role]
+        values: [args.userId, args.name, args.displayname]
     });
 }
 
@@ -174,16 +179,11 @@ SELECT
     id,
     user_id,
     name,
-    email,
-    address,
-    password,
-    sex,
-    birthday,
-    role,
+    displayname,
     created_at,
     updated_at
 FROM users
-WHERE user_id = ? LIMIT 1`;
+WHERE user_id = ? AND deleted_at IS NULL LIMIT 1`;
 
 export interface GetUserArgs {
     userId: string;
@@ -193,12 +193,7 @@ export interface GetUserRow {
     id: number;
     userId: string;
     name: string;
-    email: string;
-    address: string;
-    password: string;
-    sex: number;
-    birthday: string;
-    role: string;
+    displayname: string;
     createdAt: Date | null;
     updatedAt: Date | null;
 }
@@ -217,52 +212,9 @@ export async function getUser(client: Client, args: GetUserArgs): Promise<GetUse
         id: row[0],
         userId: row[1],
         name: row[2],
-        email: row[3],
-        address: row[4],
-        password: row[5],
-        sex: row[6],
-        birthday: row[7],
-        role: row[8],
-        createdAt: row[9],
-        updatedAt: row[10]
-    };
-}
-
-export const getUserByEmailQuery = `-- name: GetUserByEmail :one
-SELECT 
-    user_id,
-    name,
-    email,
-    role
-FROM users
-WHERE email = ? LIMIT 1`;
-
-export interface GetUserByEmailArgs {
-    email: string;
-}
-
-export interface GetUserByEmailRow {
-    userId: string;
-    name: string;
-    email: string;
-    role: string;
-}
-
-export async function getUserByEmail(client: Client, args: GetUserByEmailArgs): Promise<GetUserByEmailRow | null> {
-    const [rows] = await client.query<RowDataPacket[]>({
-        sql: getUserByEmailQuery,
-        values: [args.email],
-        rowsAsArray: true
-    });
-    if (rows.length !== 1) {
-        return null;
-    }
-    const row = rows[0];
-    return {
-        userId: row[0],
-        name: row[1],
-        email: row[2],
-        role: row[3]
+        displayname: row[3],
+        createdAt: row[4],
+        updatedAt: row[5]
     };
 }
 
@@ -271,27 +223,18 @@ SELECT
     id,
     user_id,
     name,
-    email,
-    address,
-    password,
-    sex,
-    birthday,
-    role,
+    displayname,
     created_at,
     updated_at
 FROM users
+WHERE deleted_at IS NULL
 ORDER BY created_at DESC`;
 
 export interface GetUsersRow {
     id: number;
     userId: string;
     name: string;
-    email: string;
-    address: string;
-    password: string;
-    sex: number;
-    birthday: string;
-    role: string;
+    displayname: string;
     createdAt: Date | null;
     updatedAt: Date | null;
 }
@@ -307,14 +250,9 @@ export async function getUsers(client: Client): Promise<GetUsersRow[]> {
             id: row[0],
             userId: row[1],
             name: row[2],
-            email: row[3],
-            address: row[4],
-            password: row[5],
-            sex: row[6],
-            birthday: row[7],
-            role: row[8],
-            createdAt: row[9],
-            updatedAt: row[10]
+            displayname: row[3],
+            createdAt: row[4],
+            updatedAt: row[5]
         };
     });
 }
@@ -322,34 +260,25 @@ export async function getUsers(client: Client): Promise<GetUsersRow[]> {
 export const updateUserQuery = `-- name: UpdateUser :exec
 UPDATE users
 SET name = ?,
-    email = ?,
-    address = ?,
-    sex = ?,
-    birthday = ?,
-    password = ?,
-    role = ?
-WHERE user_id = ?`;
+    displayname = ?
+WHERE user_id = ? AND deleted_at IS NULL`;
 
 export interface UpdateUserArgs {
     name: string;
-    email: string;
-    address: string;
-    sex: number;
-    birthday: string;
-    password: string;
-    role: string;
+    displayname: string;
     userId: string;
 }
 
 export async function updateUser(client: Client, args: UpdateUserArgs): Promise<void> {
     await client.query({
         sql: updateUserQuery,
-        values: [args.name, args.email, args.address, args.sex, args.birthday, args.password, args.role, args.userId]
+        values: [args.name, args.displayname, args.userId]
     });
 }
 
 export const deleteUserQuery = `-- name: DeleteUser :exec
-DELETE FROM users
+UPDATE users
+SET deleted_at = NOW()
 WHERE user_id = ?`;
 
 export interface DeleteUserArgs {
