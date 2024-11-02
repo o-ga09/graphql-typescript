@@ -2,11 +2,7 @@ query GetUser($id: ID!) {
   getUser(id: $id) {
     userId
     username
-    email
-    birthday
-    sex
-    address
-    role
+    displayname
   }
 }
 
@@ -14,69 +10,18 @@ query GetUsers {
   getUsers {
     userId
     username
-    email
-    birthday
-    sex
-    address
-    role
+    displayname
   }
 }
 
 mutation CreateUser(
+  $userId: String!
   $username: String!
-  $email: String!
-  $role: String!
-  $birthday: String!
-  $sex: String!
-  $passwordHash: String!
-  $address: String!
+  $displayname: String!
 ) {
-  createUser(
-    username: $username
-    email: $email
-    role: $role
-    birthday: $birthday
-    sex: $sex
-    passwordHash: $passwordHash
-    address: $address
-  ) {
+  createUser(userId: $userId, username: $username, displayname: $displayname) {
     userId
     username
-    email
-    birthday
-    sex
-    address
-    role
-  }
-}
-
-mutation Login($email: String!, $password: String!) {
-  login(email: $email, password: $password) {
-    token
-    user {
-      userId
-      username
-      email
-      birthday
-      sex
-      address
-      role
-    }
-  }
-}
-
-mutation Logout {
-  logout
-}
-
-query CurrentUser {
-  currentUser {
-    userId
-    username
-    email
-    birthday
-    sex
-    address
-    role
+    displayname
   }
 }

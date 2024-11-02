@@ -1,5 +1,7 @@
 "use client";
-import { MainPage } from "@/components/app-page";
+import Footer from "@/components/footer";
+import Header from "@/components/header";
+import Home from "@/components/home";
 import dynamic from "next/dynamic";
 
 const ApolloProviderWrapper = dynamic(
@@ -10,7 +12,9 @@ const ApolloProviderWrapper = dynamic(
 export default function Page() {
   return (
     <ApolloProviderWrapper>
-      <MainPage />;
+      <Header />
+      <Home />
+      <Footer />
     </ApolloProviderWrapper>
   );
 }

@@ -1,12 +1,15 @@
 "use client";
 
 import { DiaryFormComponent } from "@/components/app-components-diary-form";
-import { isAuthenticated, getCurrentUser } from "@/lib/app-lib-auth";
+import { auth } from "@/lib/firebase";
 import Link from "next/link";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 export async function CreatePage() {
-  const currentUser = await getCurrentUser();
-  if (!isAuthenticated()) {
+  const [user] = useAuthState(auth);
+
+  const currentUser = user ? user.uid : null;
+  if (user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">

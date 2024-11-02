@@ -1,30 +1,52 @@
-query GetNotes {
-  getNotes {
-    noteId
-    title
-    content
-    tags {
-      name
+query GetNotes($userId: ID!) {
+  getNotes(userId: $userId) {
+    count
+    notes {
+      noteId
+      title
+      content
+      tags {
+        name
+      }
+    }
+    author {
+      userId
+      username
+      displayname
     }
   }
 }
 
 query GetNoteById($id: ID!) {
   getNoteById(id: $id) {
-    noteId
-    title
-    content
-    tags {
-      name
+    note {
+      noteId
+      title
+      content
+      tags {
+        name
+      }
+    }
+    author {
+      userId
+      username
+      displayname
     }
   }
 }
 
-mutation CreateNote($title: String!, $content: String!, $tags: [String!]!) {
-  createNote(title: $title, content: $content, tags: $tags) {
+mutation CreateNote(
+  $userId: String!
+  $title: String!
+  $content: String!
+  $tags: [String!]!
+) {
+  createNote(userId: $userId, title: $title, content: $content, tags: $tags) {
     noteId
     title
     content
+    createdAt
+    updatedAt
     tags {
       name
     }
@@ -41,6 +63,8 @@ mutation UpdateNote(
     noteId
     title
     content
+    createdAt
+    updatedAt
     tags {
       name
     }

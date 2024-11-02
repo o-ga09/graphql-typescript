@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { isAuthenticated } from "@/lib/app-lib-auth";
 import { DiaryListComponent } from "@/components/app-components-diary-list";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "@/lib/firebase";
 
 export default function Page() {
-  if (!isAuthenticated()) {
+  const [user] = useAuthState(auth);
+  if (user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
