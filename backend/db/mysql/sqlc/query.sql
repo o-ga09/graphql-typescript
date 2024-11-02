@@ -1,10 +1,13 @@
 -- name: GetNote :one
-SELECT id, note_id, title, tags, content, created_at, updated_at FROM notes
-WHERE note_id = ? AND deleted_at IS NULL LIMIT 1;
+SELECT notes.id, notes.note_id, title, tags, content, notes.created_at, notes.updated_at, users.user_id, users.name, users.displayname FROM notes
+JOIN user_notes ON notes.note_id = user_notes.note_id
+JOIN users ON users.user_id = user_notes.user_id
+WHERE user_notes.note_id = ? AND notes.deleted_at IS NULL LIMIT 1;
 
 -- name: GetNotes :many
-SELECT id, notes.note_id, title, tags, content, notes.created_at, notes.updated_at FROM notes
+SELECT notes.id, notes.note_id, title, tags, content, notes.created_at, notes.updated_at, users.user_id, users.name, users.displayname FROM notes
 JOIN user_notes ON notes.note_id = user_notes.note_id
+JOIN users ON users.user_id = user_notes.user_id
 WHERE user_notes.user_id = ? AND notes.deleted_at IS NULL
 ORDER BY created_at DESC;
 
@@ -21,79 +24,52 @@ UPDATE notes
 SET title = ?,
     tags = ?,
     content = ?
-WHERE note_id = ?;
+WHERE note_id = ? AND notes.deleted_at IS NULL;
 
 -- name: DeleteNote :exec
 UPDATE notes
 SET deleted_at = NOW()
-WHERE note_id = ?;
+WHERE notes.note_id = ?;
 
 -- name: CreateUser :exec
 INSERT INTO users (
     user_id,
     name,
-    email,
-    address,
-    password,
-    sex,
-    birthday,
-    role
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+    displayname
+) VALUES (?, ?, ?);
 
 -- name: GetUser :one
 SELECT 
     id,
     user_id,
     name,
-    email,
-    address,
-    password,
-    sex,
-    birthday,
-    role,
+    displayname,
     created_at,
     updated_at
 FROM users
-WHERE user_id = ? LIMIT 1;
-
--- name: GetUserByEmail :one
-SELECT 
-    user_id,
-    name,
-    email,
-    role
-FROM users
-WHERE email = ? LIMIT 1;
+WHERE user_id = ? AND deleted_at IS NULL LIMIT 1;
 
 -- name: GetUsers :many
 SELECT 
     id,
     user_id,
     name,
-    email,
-    address,
-    password,
-    sex,
-    birthday,
-    role,
+    displayname,
     created_at,
     updated_at
 FROM users
+WHERE deleted_at IS NULL
 ORDER BY created_at DESC;
 
 -- name: UpdateUser :exec
 UPDATE users
 SET name = ?,
-    email = ?,
-    address = ?,
-    sex = ?,
-    birthday = ?,
-    password = ?,
-    role = ?
-WHERE user_id = ?;
+    displayname = ?
+WHERE user_id = ? AND deleted_at IS NULL;
 
 -- name: DeleteUser :exec
-DELETE FROM users
+UPDATE users
+SET deleted_at = NOW()
 WHERE user_id = ?;
 
 -- name: CreateUserNote :exec
