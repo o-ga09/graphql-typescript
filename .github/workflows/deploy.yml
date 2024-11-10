@@ -1,16 +1,18 @@
 name: Deploy
 on:
   push:
+    branches:
+      - main
     tags:
       - "v*"
 
 env:
-  SERVICE_NAME: ${{ secrets.SERVICE_NAME }}
+  SERVICE_NAME: note-app
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  GCP_REGION: ${{ secrets.GCP_REGION }}
-  GCP_REPOSITORY: ${{ secrets.GCP_REPOSITORY }}
+  GCP_REGION: ap-northeast1
+  GCP_REPOSITORY: node-api
   IMAGE: asia-northeast1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REPOSITORY }}/${{ secrets.SERVICE_NAME }}:${{ github.sha }}
-
+  WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -33,22 +35,22 @@ jobs:
         run: |
           gcloud auth configure-docker asia-northeast1-docker.pkg.dev
 
-      - name: Build a docker image
-        run: |
-          cd backend
-          docker build --platform linux/amd64 -t ${{ env.IMAGE }} --target runtime ./
+      # - name: Build a docker image
+      #   run: |
+      #     cd backend
+      #     docker build --platform linux/amd64 -t ${{ env.IMAGE }} --target production ./
 
-      - name: Push the docker image
-        run: docker push ${{ env.IMAGE }}
+      # - name: Push the docker image
+      #   run: docker push ${{ env.IMAGE }}
 
-      - name: Deploy to Cloud Run
-        run: |
-          gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image ${{ env.IMAGE }} \
-            --project ${{ env.GCP_PROJECT_ID }} \
-            --region ${{ env.GCP_REGION }} \
-            --platform=managed \
-            --allow-unauthenticated \
-            --service-account=${{ secrets.GCP_SERVICE_ACCOUNT }} \
-            --quiet \
-            --update-secrets=DATABASE_URL=DATABASE_URL:latest
+      # - name: Deploy to Cloud Run
+      #   run: |
+      #     gcloud run deploy ${{ env.SERVICE_NAME }} \
+      #       --image ${{ env.IMAGE }} \
+      #       --project ${{ env.GCP_PROJECT_ID }} \
+      #       --region ${{ env.GCP_REGION }} \
+      #       --platform=managed \
+      #       --allow-unauthenticated \
+      #       --service-account=${{ secrets.GCP_SERVICE_ACCOUNT }} \
+      #       --quiet \
+      #       --update-secrets=DATABASE_URL=DATABASE_URL:latest \
