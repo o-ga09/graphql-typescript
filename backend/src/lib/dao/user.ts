@@ -1,5 +1,5 @@
 import mysql from 'mysql2/promise';
-import { GetUserRow, getUsers, getUser, updateUser, createUser, deleteUser } from '@/generated/driver/query_sql';
+import { GetUserRow, getUsers, getUser, updateUser, createUser, deleteUser } from '../../generated/driver/query_sql';
 
 export class UserDao {
 	private connection: mysql.Connection;

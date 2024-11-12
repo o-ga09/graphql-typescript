@@ -7,7 +7,7 @@ import {
 	GetNoteRow,
 	getNotes,
 	updateNote,
-} from '@/generated/driver/query_sql';
+} from '../../generated/driver/query_sql';
 import mysql from 'mysql2/promise';
 import { generateUlid } from '../generateID/generateid';
 
