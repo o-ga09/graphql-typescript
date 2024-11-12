@@ -13,6 +13,14 @@ export default [
 				...globals.es2015,
 			},
 		},
+		settings: {
+			'import/resolver': {
+				typescript: {
+					alwaysTryTypes: true,
+					project: './tsconfig.json',
+				},
+			},
+		},
 	},
 	{
 		ignores: ['node_modules', 'dist', 'src/generated/*.ts'],
