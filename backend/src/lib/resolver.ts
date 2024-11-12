@@ -4,7 +4,6 @@ import { Note, NoteByAuthor, Notes, PostTag, Resolvers, User } from '@/generated
 import fs from 'fs';
 import { NoteDao } from './dao/note';
 import { UserDao } from './dao/user';
-import { generateUlid } from './generateID/generateid';
 
 export const typeDefs = fs.readFileSync('./schema.graphql', {
 	encoding: 'utf8',
