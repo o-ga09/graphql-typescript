@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import { GenericContainer, Wait } from 'testcontainers';
-import { UserDao } from '@/lib/dao/user';
+import { UserDao } from '../../lib/dao/user';
 import { createPool } from 'mysql2/promise';
 import path from 'path';
 
@@ -64,8 +64,8 @@ describe('UserDao Tests', () => {
 		};
 		await userDao.createUser(user);
 		const result = await userDao.getUserDetail('test-4');
-		expect(result.userId).toEqual(user.userId);
-		expect(result.name).toEqual(user.displayname);
+		expect(result?.userId).toEqual(user.userId);
+		expect(result?.name).toEqual(user.displayname);
 	});
 
 	test('getUserList should return a list of users', async () => {
@@ -75,10 +75,10 @@ describe('UserDao Tests', () => {
 
 	test('getUserDetail should return a user detail', async () => {
 		const user = await userDao.getUserDetail('test-1');
-		expect(user.id).toBeGreaterThan(0);
-		expect(user.userId).toEqual('test-1');
-		expect(user.name).toEqual('Test User');
-		expect(user.displayname).toEqual('Test User');
+		expect(user?.id).toBeGreaterThan(0);
+		expect(user?.userId).toEqual('test-1');
+		expect(user?.name).toEqual('Test User');
+		expect(user?.displayname).toEqual('Test User');
 	});
 
 	test('updateUser should update a user', async () => {
@@ -89,10 +89,10 @@ describe('UserDao Tests', () => {
 		};
 		await userDao.updateUser(updatedUser);
 		const result = await userDao.getUserDetail('test-2');
-		expect(result.id).toBeGreaterThan(0);
-		expect(result.userId).toEqual(updatedUser.userId);
-		expect(result.name).toEqual(updatedUser.name);
-		expect(result.displayname).toEqual(updatedUser.displayname);
+		expect(result?.id).toBeGreaterThan(0);
+		expect(result?.userId).toEqual(updatedUser.userId);
+		expect(result?.name).toEqual(updatedUser.name);
+		expect(result?.displayname).toEqual(updatedUser.displayname);
 	});
 
 	test('deleteUser should delete a user', async () => {

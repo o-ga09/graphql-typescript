@@ -1,11 +1,11 @@
 import { describe, it, beforeAll, afterAll, expect } from 'vitest';
 import request from 'supertest';
-import { createTestServer } from '@/lib/testUtil/testServer'; // testServer.tsのパスに合わせて変更
+import { createTestServer } from '../../lib/testUtil/testServer'; // testServer.tsのパスに合わせて変更
 import { GenericContainer, Wait } from 'testcontainers';
 import { createPool } from 'mysql2/promise';
 import path from 'path';
-import { NoteDao } from '@/lib/dao/note';
-import { UserDao } from '@/lib/dao/user';
+import { NoteDao } from '../../lib/dao/note';
+import { UserDao } from '../../lib/dao/user';
 
 let httpServer;
 let container;

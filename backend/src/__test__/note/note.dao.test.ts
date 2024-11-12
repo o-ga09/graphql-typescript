@@ -1,9 +1,9 @@
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import { GenericContainer, Wait } from 'testcontainers';
-import { NoteDao } from '@/lib/dao/note';
+import { NoteDao } from '../../lib/dao/note';
 import { createPool } from 'mysql2/promise';
 import path from 'path';
-import { UserDao } from '@/lib/dao/user';
+import { UserDao } from '../../lib/dao/user';
 
 describe('NoteDao Tests', () => {
 	let container;
