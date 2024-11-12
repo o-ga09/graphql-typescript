@@ -17,7 +17,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "dependencies": {
     "@apollo/server": "^4.10.4",
     "@graphql-tools/graphql-file-loader": "^8.0.1",
