@@ -1,5 +1,3 @@
- 
-
 import { Note, NoteByAuthor, Notes, PostTag, Resolvers, User } from '@/generated/graphql';
 import fs from 'fs';
 import { NoteDao } from './dao/note';
@@ -170,7 +168,7 @@ export const resolvers: Resolvers = {
 				await userDao.deleteUser(userId);
 				return '';
 			} catch (e) {
-				throw new Error('削除に失敗しました');
+				throw new Error('削除に失敗しました', e);
 			}
 		},
 		deleteNote: async (_, { noteId }, { dbconnection }) => {
@@ -179,7 +177,7 @@ export const resolvers: Resolvers = {
 				await noteDao.deleteNote(noteId);
 				return '';
 			} catch (e) {
-				throw new Error('削除に失敗しました');
+				throw new Error('削除に失敗しました', e);
 			}
 		},
 	},
