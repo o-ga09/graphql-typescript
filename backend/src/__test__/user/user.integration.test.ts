@@ -55,13 +55,7 @@ beforeAll(async () => {
 	await noteDao.createNote({ ...defaultNote, userId: 'test-2' });
 	await noteDao.createNote({ ...defaultNote, userId: 'test-3' });
 
-	httpServer = await createTestServer({
-		host: container.getHost(),
-		port: container.getMappedPort(3306),
-		user: 'user',
-		password: 'pass',
-		dbname: 'testdb',
-	});
+	httpServer = await createTestServer();
 	httpServer.listen(4000, () => {});
 });
 
