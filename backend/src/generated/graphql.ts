@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { GraphQLResolveInfo } from 'graphql';
 import gql from 'graphql-tag';
 export type Maybe<T> = T | null;
