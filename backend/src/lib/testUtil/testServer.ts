@@ -1,15 +1,15 @@
 import { ApolloServer } from '@apollo/server';
-import { resolvers } from '@/lib/resolver'; // リゾルバ
-import { typeDefs } from '@/lib/resolver'; // GraphQLスキーマ
+import { resolvers } from '../../lib/resolver'; // リゾルバ
+import { typeDefs } from '../../lib/resolver'; // GraphQLスキーマ
 import express from 'express';
 import { expressMiddleware } from '@apollo/server/express4';
 import http from 'http';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-import { createTestdbConnection, dbconnection } from '@/db';
+import { createTestdbConnection, dbconnection } from '../../db';
 import { NoteDao } from '../dao/note';
 import cors from 'cors';
 
-export const createTestServer = async (param: { host; user; port; password; dbname }) => {
+export const createTestServer = async () => {
 	const app = express();
 	const httpServer = http.createServer(app);
 
@@ -27,7 +27,7 @@ export const createTestServer = async (param: { host; user; port; password; dbna
 		express.json(),
 		expressMiddleware(server, {
 			context: async () => {
-				await createTestdbConnection(param);
+				await createTestdbConnection();
 				const noteDao = new NoteDao(dbconnection);
 				return { noteDao };
 			},
