@@ -9,7 +9,7 @@ export async function CreatePage() {
   const [user] = useAuthState(auth);
 
   const currentUser = user ? user.uid : null;
-  if (user) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">

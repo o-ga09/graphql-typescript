@@ -3,7 +3,7 @@ import Link from "next/link";
 import SignupForm from "@/components/SignUpForm";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
   const GoogleProvider = new GoogleAuthProvider();
