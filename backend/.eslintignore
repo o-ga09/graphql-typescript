@@ -22,3 +22,5 @@ compose.yml
 .env
 .env.default
 Dockerfile
+dist/
+src/generated/

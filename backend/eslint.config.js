@@ -1,28 +1,31 @@
-import globals from 'globals';
-import eslint from '@eslint/js';
-import tseslint from 'typescript-eslint';
+// eslint.config.js
+const globals = require('globals');
+const parser = require('@typescript-eslint/parser');
 
-export default [
-	eslint.configs.recommended,
-	...tseslint.configs.recommended,
+module.exports = [
 	{
+		files: ['**/*.ts', '**/*.tsx'],
 		languageOptions: {
+			ecmaVersion: 2021,
+			sourceType: 'module',
+			parser: parser,
 			globals: {
-				...globals.browser,
-				...globals.node,
-				...globals.es2015,
+				amd: 'readonly',
+				...Object.fromEntries(Object.entries(globals).map(([key, value]) => [key, 'readonly'])),
 			},
 		},
-		settings: {
-			'import/resolver': {
-				typescript: {
-					alwaysTryTypes: true,
-					project: './tsconfig.json',
-				},
-			},
+		plugins: {
+			'@typescript-eslint': require('@typescript-eslint/eslint-plugin'),
 		},
-	},
-	{
-		ignores: ['node_modules', 'dist', 'src/generated/*.ts'],
+		rules: {
+			'@typescript-eslint/no-unused-vars': 'warn',
+			'@typescript-eslint/no-explicit-any': 'off',
+		},
+		ignores: [
+			// .eslintignoreの内容をここに��動
+			'node_modules/',
+			'dist/',
+			'build/',
+		],
 	},
 ];

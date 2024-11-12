@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+ 
 
 import { Note, NoteByAuthor, Notes, PostTag, Resolvers, User } from '@/generated/graphql';
 import fs from 'fs';
