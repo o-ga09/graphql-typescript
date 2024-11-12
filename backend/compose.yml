@@ -15,5 +15,19 @@ services:
       - db_data:/var/lib/mysql
       - ./db/mysql/conf.d/my.cnf:/etc/mysql/conf.d/my.cnf
       - ./db/mysql/init:/docker-entrypoint-initdb.d
+  backend:
+    container_name: blog-app-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    platform: linux/x86_64
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      PORT: 8080
+      DATABASE_URL: mysql://user:P@ssw0rd@db:3306/note_app
 volumes:
   db_data:
