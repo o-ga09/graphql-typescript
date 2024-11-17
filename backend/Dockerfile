@@ -6,6 +6,7 @@ WORKDIR /app
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
+COPY schema.graphql ./
 
 # Install dependencies
 RUN npm install
@@ -24,6 +25,7 @@ WORKDIR /app
 
 # Copy only the necessary files from the build stage
 COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/schema.graphql ./
 COPY --from=builder /app/dist ./dist
 
 # Install only production dependencies
