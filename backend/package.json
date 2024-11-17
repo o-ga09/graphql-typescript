@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "transpile": "tsc",
+    "build": "tsc",
     "start": "npm run transpile && node dist/app.js",
     "dev": "nodemon --watch 'src/**/*.ts' --exec 'tsx' src/app.ts",
     "generate:server": "npx graphql-codegen",
