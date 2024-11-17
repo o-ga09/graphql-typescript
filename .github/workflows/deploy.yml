@@ -5,6 +5,8 @@ on:
       - main
     tags:
       - "v*"
+    paths:
+      - "backend/**"
 
 env:
   SERVICE_NAME: note-app

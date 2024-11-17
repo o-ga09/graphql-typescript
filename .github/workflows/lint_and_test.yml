@@ -1,7 +1,17 @@
 name: Lint and Test
 on:
   push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - "frontend/**"
   pull_request:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - "frontend/**"
 jobs:
   test:
     runs-on: ubuntu-latest
