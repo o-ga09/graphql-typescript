@@ -57,3 +57,5 @@ jobs:
             --service-account=${{ secrets.SERVICE_ACCOUNT }} \
             --quiet \
             --update-secrets=DATABASE_URL=DATABASE_URL:latest \
+        env:
+          IMAGE: asia-northeast1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_REPOSITORY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
