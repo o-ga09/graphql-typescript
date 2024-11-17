@@ -33,4 +33,4 @@ RUN npm install --only=production
 EXPOSE 8080
 
 # Command to run the application
-CMD ["node", "dist/src/app.js"]
+CMD ["node", "dist/app.js"]
