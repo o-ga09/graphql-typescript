@@ -56,7 +56,13 @@ beforeAll(async () => {
 	await noteDao.createNote({ ...defaultNote, userId: 'test-2' });
 	await noteDao.createNote({ ...defaultNote, userId: 'test-3' });
 
-	httpServer = await createTestServer();
+	httpServer = await createTestServer({
+		dbuser: 'user',
+		dbpassword: 'pass',
+		dbhost: container.getHost(),
+		dbport: container.getMappedPort(3306),
+		dbname: 'testdb',
+	});
 	httpServer.listen(4000, () => {});
 });
 

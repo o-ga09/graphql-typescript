@@ -9,7 +9,15 @@ import { createTestdbConnection, dbconnection } from '../../db';
 import { NoteDao } from '../dao/note';
 import cors from 'cors';
 
-export const createTestServer = async () => {
+export interface TestServerParam {
+	dbuser: string;
+	dbpassword: string;
+	dbhost: string;
+	dbport: string;
+	dbname: string;
+}
+
+export const createTestServer = async (param: TestServerParam) => {
 	const app = express();
 	const httpServer = http.createServer(app);
 
@@ -27,7 +35,7 @@ export const createTestServer = async () => {
 		express.json(),
 		expressMiddleware(server, {
 			context: async () => {
-				await createTestdbConnection();
+				await createTestdbConnection(param);
 				const noteDao = new NoteDao(dbconnection);
 				return { noteDao };
 			},

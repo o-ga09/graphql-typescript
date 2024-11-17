@@ -1,4 +1,5 @@
 import mysql, { createPool, PoolConnection } from 'mysql2/promise';
+import { TestServerParam } from './lib/testUtil/testServer';
 
 export let dbconnection: mysql.Connection;
 export let Testdbconnection: PoolConnection;
@@ -20,8 +21,9 @@ export const closeConnection = async () => {
 };
 
 // Close the MySQL connection for Test
-export const createTestdbConnection = async () => {
-	const dsn = process.env.DATABASE_URL;
+export const createTestdbConnection = async (param: TestServerParam) => {
+	// mysql://user:P@ssw0rd@localhost:3306/note_app
+	const dsn = `mysql://${param.dbuser}:${param.dbpassword}@${param.dbhost}:${param.dbport}/${param.dbname}`;
 	const pool = await createPool(dsn);
 	Testdbconnection = await pool.getConnection();
 };
