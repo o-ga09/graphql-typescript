@@ -1,5 +1,20 @@
 ## Typescript で GraphQL を使用したブログアプリ
 
+[![Lint and Test](https://github.com/o-ga09/graphql-typescript/actions/workflows/lint_and_test.yml/badge.svg)](https://github.com/o-ga09/graphql-typescript/actions/workflows/lint_and_test.yml)
+
+[![Deploy](https://github.com/o-ga09/graphql-typescript/actions/workflows/deploy.yml/badge.svg)](https://github.com/o-ga09/graphql-typescript/actions/workflows/deploy.yml)
+
+````
+```
+本プロジェクトできること:
+- ユーザーの取得、作成、更新、削除
+- ノートの取得、作成、更新、削除
+
+本プロジェクトできないこと:
+- 画面からのユーザー、ノートの操作
+```
+````
+
 ## Requirement
 
 ```bash
