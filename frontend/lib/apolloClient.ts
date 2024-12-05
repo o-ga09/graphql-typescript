@@ -1,22 +1,7 @@
-import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
-import { setContext } from "@apollo/client/link/context";
-
-const httpLink = createHttpLink({
-  uri: "http://localhost:8080/graphql", // GraphQLサーバーのURLを指定
-});
-
-const authLink = setContext((_, { headers }) => {
-  const token = localStorage.getItem("token");
-  return {
-    headers: {
-      ...headers,
-      authorization: token ? `Bearer ${token}` : "",
-    },
-  };
-});
+import { ApolloClient, InMemoryCache } from "@apollo/client";
 
 const client = new ApolloClient({
-  link: authLink.concat(httpLink),
+  uri: process.env.NEXT_PUBLIC_BACKEND_API_URL, // GraphQLサーバーのエンドポイント
   cache: new InMemoryCache(),
 });
 
