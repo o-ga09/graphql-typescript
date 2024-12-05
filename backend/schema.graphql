@@ -1,3 +1,8 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+scalar DateTime
+
 type PostTag {
   name: String!
 }
@@ -6,8 +11,8 @@ type Note {
   noteId: ID!
   title: String!
   content: String!
-  createdAt: String!
-  updatedAt: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
   tags: [PostTag!]!
 }
 
@@ -38,10 +43,15 @@ type Query {
 
 type Mutation {
   createUser(userId: String!, username: String!, displayname: String!): User
-  updateUser(userId: ID!, username: String, displayname: String!): User
+  updateUser(userId: ID!, username: String!, displayname: String): User
   deleteUser(userId: ID!): String
 
-  createNote(userId: String!, title: String!, content: String!, tags: [String!]!): Note
-  updateNote(noteId: ID!, title: String, content: String, tags: [String!]!): Note
+  createNote(
+    userId: String!
+    title: String!
+    content: String!
+    tags: [String!]!
+  ): Note
+  updateNote(noteId: ID!, title: String, content: String, tags: [String!]): Note
   deleteNote(noteId: ID!): String
 }
