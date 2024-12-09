@@ -83,14 +83,14 @@ export default function Header() {
                   {dropdownOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
                       <Link
-                        href={`/${user.uid}`}
+                        href={`/${user.username}`}
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                       >
                         <User size={16} className="mr-2" />
                         マイページ
                       </Link>
                       <Link
-                        href={`/${user.uid}/profile`}
+                        href={`/${user.username}/profile`}
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                       >
                         <User size={16} className="mr-2" />

@@ -1,10 +1,5 @@
 import Link from "next/link";
-
-type Note = {
-  id: number;
-  title: string;
-  content: string;
-};
+import { Note } from "./noteGrid";
 
 type NoteCardProps = {
   note: Note;

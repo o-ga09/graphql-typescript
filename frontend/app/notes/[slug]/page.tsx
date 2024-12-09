@@ -1,49 +1,46 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { useQuery, useMutation } from "@apollo/client";
+import { GET_NOTE_BY_ID, DELETE_NOTE } from "@/graphql/operations";
 import Header from "@/components/header";
-
-type Note = {
-  id: number;
-  title: string;
-  content: string;
-};
+import Loading from "@/app/loading";
+import Error from "@/app/error";
+import { useEffect } from "react";
 
 export default function NotePage() {
-  const [note, setNote] = useState<Note | null>(null);
   const params = useParams();
   const router = useRouter();
   const { slug } = params;
 
-  useEffect(() => {
-    // ここで実際のAPIからノートデータを取得します
-    // この例では、モックデータを使用しています
-    const fetchNote = async () => {
-      // 実際のアプリケーションでは、この部分をAPIリクエストに置き換えます
-      const mockNote = {
-        id: parseInt(slug as string),
-        title: `ノート ${slug}`,
-        content: `これはノート ${slug} の内容です。実際のアプリケーションでは、ここに本文が表示されます。`,
-      };
-      setNote(mockNote);
-    };
+  const { loading, error, data, refetch } = useQuery(GET_NOTE_BY_ID, {
+    variables: { id: slug },
+  });
 
-    fetchNote();
-  }, [slug]);
+  useEffect(() => {
+    refetch();
+  }, []);
+
+  const [deleteNote] = useMutation(DELETE_NOTE);
 
   const handleDelete = async () => {
     if (confirm("本当にこのノートを削除しますか？")) {
-      // ここで実際の削除APIを呼び出します
-      console.log("ノートを削除:", slug);
-      router.push("/");
+      try {
+        await deleteNote({
+          variables: { noteId: slug },
+        });
+        router.push("/");
+      } catch (error) {
+        console.error("ノート削除エラー:", error);
+      }
     }
   };
 
-  if (!note) {
-    return <div>読み込み中...</div>;
-  }
+  if (loading) return <Loading />;
+  if (error) return <Error />;
+
+  const note = data.getNoteById.note;
 
   return (
     <>

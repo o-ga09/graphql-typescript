@@ -1,26 +1,56 @@
 "use client";
 import Header from "@/components/header";
-import { NoteGrid } from "@/components/noteGrid";
-import PublicHeader from "@/components/publicHeader";
-import { useAuth } from "@/context/authContext";
+import { Note, NoteGrid } from "@/components/noteGrid";
 import { useSidebar } from "@/context/sideBarContext";
+import { GET_NOTES } from "@/graphql/operations";
+import { useQuery } from "@apollo/client";
+import Loading from "./loading";
+import Error from "./error";
+import { useAuth } from "@/context/authContext";
+import NotFound from "./not-found";
+import { useEffect } from "react";
 
 export default function Page() {
-  const { isOpen } = useSidebar();
   const { user } = useAuth();
+  const { isOpen } = useSidebar();
 
-  const notes = [
-    { id: 1, title: "ノート1", content: "これはノート1の内容です。" },
-    { id: 2, title: "ノート2", content: "これはノート2の内容です。" },
-    { id: 3, title: "ノート3", content: "これはノート3の内容です。" },
-    { id: 4, title: "ノート4", content: "これはノート4の内容です。" },
-    { id: 5, title: "ノート5", content: "これはノート5の内容です。" },
-    { id: 6, title: "ノート6", content: "これはノート6の内容です。" },
-  ];
+  const { loading, error, data, refetch } = useQuery(GET_NOTES, {
+    variables: { userId: user?.uid },
+  });
 
+  useEffect(() => {
+    refetch();
+  }, []);
+
+  if (!user) {
+    return <div>ログインしてください</div>;
+  }
+
+  if (loading) return <Loading />;
+  if (!data) {
+    return <NotFound />;
+  }
+  const notes: Note[] = data.getNotes.notes.map(
+    (note: {
+      noteId: string;
+      title: string;
+      content: string;
+      createdAt: string;
+      updatedAt: string;
+      tags: { name: string }[];
+    }) => ({
+      id: note.noteId,
+      title: note.title,
+      content: note.content,
+      createdAt: note.createdAt,
+      updatedAt: note.updatedAt,
+      tags: note.tags.map((tag: { name: string }) => tag.name),
+    })
+  );
+  if (error) return <Error />;
   return (
     <>
-      {user ? <Header /> : <PublicHeader />}
+      <Header />
       <div
         className={`container mx-auto px-4 transition-all duration-300 ease-in-out ${
           isOpen ? "pl-64" : "pl-0"

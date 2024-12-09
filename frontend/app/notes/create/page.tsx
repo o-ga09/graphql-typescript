@@ -5,13 +5,18 @@ import { useRouter } from "next/navigation";
 import { useSidebar } from "@/context/sideBarContext";
 import { useAuth } from "@/context/authContext";
 import Header from "@/components/header";
+import { useMutation } from "@apollo/client";
+import { CREATE_NOTE } from "@/graphql/operations";
 
 export default function BlockPage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [tagsInput, setTagsInput] = useState("");
   const router = useRouter();
   const { isOpen } = useSidebar();
   const { user } = useAuth();
+
+  const [createNote] = useMutation(CREATE_NOTE);
 
   if (!user) {
     return <div>ログインしてください</div>;
@@ -19,10 +24,22 @@ export default function BlockPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // ここでノート作成のAPIリクエストを行います
-    console.log("ノートを作成:", { title, content });
-    // 作成後、トップページにリダイレクト
-    router.push("/");
+
+    try {
+      const { data } = await createNote({
+        variables: {
+          userId: user.uid,
+          title: title,
+          content: content,
+          tags: tagsInput,
+        },
+      });
+      // 作成後、トップページにリダイレクト
+      console.log("ノート作成成功:", data);
+      router.push("/");
+    } catch (error) {
+      console.error("ノート作成エラー:", error);
+    }
   };
 
   return (
@@ -67,6 +84,22 @@ export default function BlockPage() {
                 rows={10}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               ></textarea>
+            </div>
+            <div>
+              <label
+                htmlFor="tags"
+                className="block text-sm font-medium text-gray-700"
+              >
+                タグ（カンマ区切り）
+              </label>
+              <input
+                type="text"
+                id="tags"
+                value={tagsInput}
+                onChange={(e) => setTagsInput(e.target.value)}
+                placeholder="例: JavaScript, React, GraphQL"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              />
             </div>
             <button
               type="submit"

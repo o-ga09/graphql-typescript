@@ -3,28 +3,26 @@ import Header from "@/components/header";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/context/authContext";
 import { useSidebar } from "@/context/sideBarContext";
-import { GET_USER_PROFILE } from "@/gql/getUser";
 import { useQuery } from "@apollo/client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs";
 import { Badge, Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import React, { useState } from "react";
 import Loading from "../loading";
 import Error from "../error";
 import NotFound from "../not-found";
+import { GET_USER } from "@/graphql/operations";
 
 export default function Page() {
   const { isOpen } = useSidebar();
-  const params = useParams();
-  const { userId } = params;
   const [activeTab, setActiveTab] = useState("articles");
   const { user } = useAuth();
 
-  const { data, loading, error } = useQuery(GET_USER_PROFILE, {
-    variables: { userId },
+  const { data, loading, error } = useQuery(GET_USER, {
+    variables: { id: user?.uid },
   });
+
   if (loading) return <Loading />;
 
   if (error && error?.message === "sql: no rows in result set") {
@@ -59,7 +57,6 @@ export default function Page() {
     },
     // 他の記事
   ];
-
   return (
     <>
       <Header />
@@ -78,7 +75,9 @@ export default function Page() {
               className="rounded-full"
             />
             <div className="flex-grow">
-              <h1 className="text-3xl font-bold mb-2">{data?.displayName}</h1>
+              <h1 className="text-3xl font-bold mb-2">
+                {data.getUser.displayname}
+              </h1>
               <p className="text-gray-600 mb-4">
                 新卒4年目のSEです。ミドルウェアとアプリの中間の人です。サーバ好き。
               </p>
@@ -89,7 +88,9 @@ export default function Page() {
               </div>
             </div>
             <button className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition duration-300">
-              <Link href={`${user?.username}/profile`}>Edit profile</Link>
+              <Link href={`${data.getUser.username}/profile`}>
+                Edit profile
+              </Link>
             </button>
           </div>
 
