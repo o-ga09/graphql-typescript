@@ -51,6 +51,7 @@ beforeAll(async () => {
 	await userDao.createUser({ ...defaultUser, userId: 'test-2' });
 	await userDao.createUser({ ...defaultUser, userId: 'test-3' });
 	await userDao.createUser({ ...defaultUser, userId: 'test-4' });
+	await userDao.createUser({ ...defaultUser, userId: 'test-5' });
 	await noteDao.createNote({ ...defaultNote, userId: 'test-1' });
 	await noteDao.createNote({ ...defaultNote, userId: 'test-2' });
 	await noteDao.createNote({ ...defaultNote, userId: 'test-3' });
@@ -122,7 +123,7 @@ describe('GraphQL API', () => {
 		it('ユーザーの情報が更新できること', async () => {
 			const mutation = {
 				query: `
-					mutation UpdateUser($userId: ID!, $displayname: String!, $username: String) {
+					mutation UpdateUser($userId: ID!, $displayname: String!, $username: String!) {
 						updateUser(userId: $userId, displayname: $displayname, username: $username) {
 							userId
 							username
@@ -130,7 +131,7 @@ describe('GraphQL API', () => {
 						}
 					}
 				`,
-				variables: { userId: 'test-4', username: 'testuser', displayname: 'Test User' },
+				variables: { userId: 'test-5', username: 'testuser', displayname: 'Test User' },
 			};
 			const response = await request(httpServer).post('/graphql').send(mutation);
 			expect(response.status).toBe(200);
