@@ -2,35 +2,27 @@
 import Header from "@/components/header";
 import { Note, NoteGrid } from "@/components/noteGrid";
 import { useSidebar } from "@/context/sideBarContext";
-import { GET_NOTES } from "@/graphql/operations";
+import { GET_NOTES_ALL } from "@/graphql/operations";
 import { useQuery } from "@apollo/client";
 import Loading from "./loading";
 import Error from "./error";
-import { useAuth } from "@/context/authContext";
 import NotFound from "./not-found";
 import { useEffect } from "react";
 
 export default function Page() {
-  const { user } = useAuth();
   const { isOpen } = useSidebar();
-
-  const { loading, error, data, refetch } = useQuery(GET_NOTES, {
-    variables: { userId: user?.uid },
-  });
+  const { loading, error, data, refetch } = useQuery(GET_NOTES_ALL);
 
   useEffect(() => {
     refetch();
   }, []);
 
-  if (!user) {
-    return <div>ログインしてください</div>;
-  }
-
   if (loading) return <Loading />;
   if (!data) {
     return <NotFound />;
   }
-  const notes: Note[] = data.getNotes.notes.map(
+  console.log("⭐️", data);
+  const notes: Note[] = data.getNoteAll.map(
     (note: {
       noteId: string;
       title: string;

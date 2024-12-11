@@ -128,3 +128,18 @@ export const DELETE_NOTE = gql`
     deleteNote(noteId: $noteId)
   }
 `;
+
+export const GET_NOTES_ALL = gql`
+  query GetNotesAll {
+    getNoteAll {
+      noteId
+      title
+      content
+      tags {
+        name
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
