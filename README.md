@@ -200,8 +200,20 @@ gcloud iam service-accounts add-iam-policy-binding "githubactions@<PROJECT_ID>.i
 
 ```
 
+## Firebase Authetication を Firebase 以外のデプロイ先で使用する
+
+1. Firebase コンソールにログイン: Firebase コンソールにログインします。
+2. プロジェクトを選択: 使用しているプロジェクトを選択します。
+3. Authentication 設定に移動: 左側のメニューから「Authentication」を選択する
+4. 認証ドメインの追加: 「承認済みドメイン」セクションに移動し、Vercel で使用しているドメインを追加します。例えば、your-project.vercel.app のように追加します。
+5. 設定の保存: ドメインを追加したら、設定を保存します。
+
+## Vercel と Google Cloud の OIDC 認証
+
 ## 参考
 
 https://cloud.google.com/iam/docs/workload-identity-federation-with-deployment-pipelines?hl=ja#gcloud
+
+https://vercel.com/docs/security/secure-backend-access/oidc/gcp
 
 LICENSE @o-ga09
