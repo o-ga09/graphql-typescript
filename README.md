@@ -216,4 +216,6 @@ https://cloud.google.com/iam/docs/workload-identity-federation-with-deployment-p
 
 https://vercel.com/docs/security/secure-backend-access/oidc/gcp
 
+https://blog.p1ass.com/posts/vercel-cloud-run-iam/
+
 LICENSE @o-ga09
