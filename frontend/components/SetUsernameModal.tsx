@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/authContext";
-import { CREATE_USER } from "../graphql/operations";
-import { useMutation } from "@apollo/client";
+import { useCreateUserMutation } from "@/lib/generated/graphql";
 
 const SetUsernameModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { user, setUser } = useAuth();
   const [username, setUsername] = useState("");
   const [displayname, setDisplayname] = useState("");
-  const [createUser] = useMutation(CREATE_USER);
+  const [createUser] = useCreateUserMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,8 +21,8 @@ const SetUsernameModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       // ユーザーデータを更新
       setUser({
         ...user,
-        username: data.createUser.username,
-        displayname: data.createUser.displayname,
+        username: data?.createUser?.username ?? "",
+        displayname: data?.createUser?.displayname ?? "",
       });
       onClose();
     }

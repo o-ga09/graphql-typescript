@@ -3,23 +3,26 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/authContext";
-import { useQuery, useMutation } from "@apollo/client";
-import { GET_NOTE_BY_ID, UPDATE_NOTE } from "@/graphql/operations";
 import Header from "@/components/header";
 import Loading from "@/app/loading";
 import Error from "@/app/error";
+import {
+  useUpdateNoteMutation,
+  useGetNoteByIdQuery,
+} from "@/lib/generated/graphql";
 
 export default function EditNotePage() {
   const { user } = useAuth();
   const params = useParams();
   const router = useRouter();
   const { slug } = params;
+  const noteId = Array.isArray(slug) ? slug[0] : slug;
 
-  const { loading, error, data } = useQuery(GET_NOTE_BY_ID, {
-    variables: { id: slug },
+  const { loading, error, data } = useGetNoteByIdQuery({
+    variables: { id: noteId },
   });
 
-  const [updateNote] = useMutation(UPDATE_NOTE);
+  const [updateNote] = useUpdateNoteMutation();
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -27,11 +30,11 @@ export default function EditNotePage() {
 
   useEffect(() => {
     if (data) {
-      const note = data.getNoteById.note;
-      setTitle(note.title);
-      setContent(note.content);
+      const note = data?.getNoteById?.note;
+      setTitle(note?.title || "");
+      setContent(note?.content || "");
       setTagsInput(
-        note.tags.map((tag: { name: string }) => tag.name).join(", ")
+        note?.tags?.map((tag: { name: string }) => tag.name).join(", ") || ""
       );
     }
   }, [data]);
@@ -49,7 +52,7 @@ export default function EditNotePage() {
     try {
       await updateNote({
         variables: {
-          noteId: slug,
+          noteId: noteId,
           title: title,
           content: content,
           tags: tagsInput.split(",").map((tag) => tag.trim()),

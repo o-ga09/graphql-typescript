@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { User as FirebaseUser } from "firebase/auth";
 import { auth } from "../lib/firebase";
-import { useQuery, useMutation } from "@apollo/client";
-import { GET_USER, CREATE_USER } from "@/graphql/operations";
+import {
+  useCreateUserMutation,
+  useGetUserQuery,
+} from "@/lib/generated/graphql";
 
 type User = {
   userId: string;
@@ -16,11 +18,11 @@ export function useUser() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { refetch: refetchUser } = useQuery(GET_USER, {
-    skip: true, // 初期状態ではクエリを実行しない
+  const { refetch: refetchUser } = useGetUserQuery({
+    skip: true,
   });
 
-  const [createUser] = useMutation(CREATE_USER);
+  const [createUser] = useCreateUserMutation();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {

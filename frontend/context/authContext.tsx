@@ -3,8 +3,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { auth } from "../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { gql, useQuery } from "@apollo/client";
 import SetUsernameModal from "../components/SetUsernameModal";
+import { useGetUserQuery } from "@/lib/generated/graphql";
 
 type User = {
   uid: string;
@@ -26,16 +26,6 @@ const AuthContext = createContext<AuthContextType>({
 
 export const useAuth = () => useContext(AuthContext);
 
-const GET_USER = gql`
-  query GetUser($id: ID!) {
-    getUser(id: $id) {
-      userId
-      username
-      displayname
-    }
-  }
-`;
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -43,9 +33,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState(true);
   const [usernameModalOpen, setUsernameModalOpen] = useState(false);
 
-  const { refetch } = useQuery(GET_USER, {
-    skip: !user,
-    variables: { id: user?.uid },
+  const { refetch } = useGetUserQuery({
+    skip: true,
   });
 
   useEffect(() => {

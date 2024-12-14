@@ -2,20 +2,21 @@
 
 import { useAuth } from "@/context/authContext";
 import { useSidebar } from "@/context/sideBarContext";
-import { useQuery } from "@apollo/client";
-import { GET_NOTES } from "@/graphql/operations";
 import Header from "@/components/header";
 import Link from "next/link";
 import Loading from "../loading";
 import Error from "../error";
 import { useEffect } from "react";
+import { useGetNotesByUserIdQuery } from "@/lib/generated/graphql";
 
 export default function NotesPage() {
   const { user } = useAuth();
   const { isOpen } = useSidebar();
 
-  const { loading, error, data, refetch } = useQuery(GET_NOTES, {
-    variables: { userId: user?.uid },
+  const { data, loading, error, refetch } = useGetNotesByUserIdQuery({
+    variables: {
+      userId: user?.uid || "",
+    },
   });
 
   useEffect(() => {
@@ -29,7 +30,7 @@ export default function NotesPage() {
   if (loading) return <Loading />;
   if (error) return <Error />;
 
-  const notes = data.getNotes.notes;
+  const notes = data?.getNotesByUserId?.notes || [];
 
   return (
     <>

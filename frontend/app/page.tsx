@@ -2,16 +2,15 @@
 import Header from "@/components/header";
 import { Note, NoteGrid } from "@/components/noteGrid";
 import { useSidebar } from "@/context/sideBarContext";
-import { GET_NOTES_ALL } from "@/graphql/operations";
-import { useQuery } from "@apollo/client";
 import Loading from "./loading";
 import Error from "./error";
 import NotFound from "./not-found";
 import { useEffect } from "react";
+import { useGetNotesAllQuery } from "@/lib/generated/graphql";
 
 export default function Page() {
   const { isOpen } = useSidebar();
-  const { loading, error, data, refetch } = useQuery(GET_NOTES_ALL);
+  const { data, loading, error, refetch } = useGetNotesAllQuery();
 
   useEffect(() => {
     refetch();
@@ -22,23 +21,32 @@ export default function Page() {
     return <NotFound />;
   }
   console.log("⭐️", data);
-  const notes: Note[] = data.getNoteAll.map(
-    (note: {
-      noteId: string;
-      title: string;
-      content: string;
-      createdAt: string;
-      updatedAt: string;
-      tags: { name: string }[];
-    }) => ({
-      id: note.noteId,
-      title: note.title,
-      content: note.content,
-      createdAt: note.createdAt,
-      updatedAt: note.updatedAt,
-      tags: note.tags.map((tag: { name: string }) => tag.name),
-    })
-  );
+  const notes: Note[] =
+    data?.getNoteAll
+      ?.map(
+        (
+          note: {
+            __typename?: "Note";
+            noteId: string;
+            title: string;
+            content: string;
+            createdAt: unknown;
+            updatedAt: unknown;
+            tags: { __typename?: "PostTag"; name: string }[];
+          } | null
+        ) =>
+          note
+            ? {
+                id: note.noteId,
+                title: note.title,
+                content: note.content,
+                createdAt: note.createdAt,
+                updatedAt: note.updatedAt,
+                tags: note.tags.map((tag: { name: string }) => tag.name),
+              }
+            : null
+      )
+      .filter((note): note is Note => note !== null) || [];
   if (error) return <Error />;
   return (
     <>

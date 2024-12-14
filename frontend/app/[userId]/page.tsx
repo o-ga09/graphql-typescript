@@ -3,7 +3,6 @@ import Header from "@/components/header";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/context/authContext";
 import { useSidebar } from "@/context/sideBarContext";
-import { useQuery } from "@apollo/client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs";
 import { Badge, Heart } from "lucide-react";
 import Image from "next/image";
@@ -12,15 +11,17 @@ import React, { useState } from "react";
 import Loading from "../loading";
 import Error from "../error";
 import NotFound from "../not-found";
-import { GET_USER } from "@/graphql/operations";
+import { useGetUserQuery } from "@/lib/generated/graphql";
 
 export default function Page() {
   const { isOpen } = useSidebar();
   const [activeTab, setActiveTab] = useState("articles");
   const { user } = useAuth();
 
-  const { data, loading, error } = useQuery(GET_USER, {
-    variables: { id: user?.uid },
+  const { data, loading, error } = useGetUserQuery({
+    variables: {
+      id: user?.uid || "",
+    },
   });
 
   if (loading) return <Loading />;
@@ -76,7 +77,7 @@ export default function Page() {
             />
             <div className="flex-grow">
               <h1 className="text-3xl font-bold mb-2">
-                {data.getUser.displayname}
+                {data?.getUser?.displayname}
               </h1>
               <p className="text-gray-600 mb-4">
                 新卒4年目のSEです。ミドルウェアとアプリの中間の人です。サーバ好き。
@@ -88,7 +89,7 @@ export default function Page() {
               </div>
             </div>
             <button className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition duration-300">
-              <Link href={`${data.getUser.username}/profile`}>
+              <Link href={`${data?.getUser?.username}/profile`}>
                 Edit profile
               </Link>
             </button>

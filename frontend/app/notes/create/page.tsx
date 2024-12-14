@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSidebar } from "@/context/sideBarContext";
 import { useAuth } from "@/context/authContext";
 import Header from "@/components/header";
-import { useMutation } from "@apollo/client";
-import { CREATE_NOTE } from "@/graphql/operations";
+import { useCreateNoteMutation } from "@/lib/generated/graphql";
 
 export default function BlockPage() {
   const [title, setTitle] = useState("");
@@ -16,7 +15,7 @@ export default function BlockPage() {
   const { isOpen } = useSidebar();
   const { user } = useAuth();
 
-  const [createNote] = useMutation(CREATE_NOTE);
+  const [createNote] = useCreateNoteMutation();
 
   if (!user) {
     return <div>ログインしてください</div>;
