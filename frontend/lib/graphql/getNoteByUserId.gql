@@ -1,0 +1,20 @@
+query GetNotesByUserId($userId: ID!) {
+  getNotesByUserId(userId: $userId) {
+    count
+    notes {
+      noteId
+      title
+      content
+      createdAt
+      updatedAt
+      tags {
+        name
+      }
+    }
+    author {
+      userId
+      username
+      displayname
+    }
+  }
+}

@@ -1,0 +1,17 @@
+mutation UpdateNote(
+  $noteId: ID!
+  $title: String
+  $content: String
+  $tags: [String!]
+) {
+  updateNote(noteId: $noteId, title: $title, content: $content, tags: $tags) {
+    noteId
+    title
+    content
+    createdAt
+    updatedAt
+    tags {
+      name
+    }
+  }
+}

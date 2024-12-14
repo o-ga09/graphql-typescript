@@ -1,0 +1,17 @@
+mutation CreateNote(
+  $userId: String!
+  $title: String!
+  $content: String!
+  $tags: [String!]!
+) {
+  createNote(userId: $userId, title: $title, content: $content, tags: $tags) {
+    noteId
+    title
+    content
+    createdAt
+    updatedAt
+    tags {
+      name
+    }
+  }
+}

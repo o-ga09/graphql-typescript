@@ -1,0 +1,12 @@
+query GetNotesAll {
+  getNoteAll {
+    noteId
+    title
+    content
+    tags {
+      name
+    }
+    createdAt
+    updatedAt
+  }
+}

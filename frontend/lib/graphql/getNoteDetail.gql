@@ -1,0 +1,19 @@
+query GetNoteById($id: ID!) {
+  getNoteById(id: $id) {
+    note {
+      noteId
+      title
+      content
+      createdAt
+      updatedAt
+      tags {
+        name
+      }
+    }
+    author {
+      userId
+      username
+      displayname
+    }
+  }
+}
