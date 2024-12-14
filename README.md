@@ -166,23 +166,23 @@ gcloud iam service-accounts create github-actions-sa \
   --display-name="GitHub Actions Service Account"
 
 # サービスアカウントに必要なロールを付与
-gcloud projects add-iam-policy-binding <PROJECT_ID> \
-  --member="serviceAccount:githubactions@<PROJECT_ID>.iam.gserviceaccount.com" \
+gcloud projects add-iam-policy-binding <ProjectID> \
+  --member="serviceAccount:githubactions@<ProjectID>.iam.gserviceaccount.com" \
   --role="roles/run.admin"
 
-gcloud projects add-iam-policy-binding <PROJECT_ID> \
-  --member="serviceAccount:githubactions@<PROJECT_ID>.iam.gserviceaccount.com" \
+gcloud projects add-iam-policy-binding <ProjectID> \
+  --member="serviceAccount:githubactions@<ProjectID>.iam.gserviceaccount.com" \
   --role="roles/iam.serviceAccountUser"
 
 # Workload Identity Poolの作成
 gcloud iam workload-identity-pools create "github-actions-pool" \
-  --project="<PROJECT_ID>" \
+  --project="<ProjectID>" \
   --location="global" \
   --display-name="GitHub Actions Pool"
 
 # Workload Identity Providerの作成
 gcloud iam workload-identity-pools providers create-oidc "github-actions-provider" \
-  --project="<PROJECT_ID>" \
+  --project="<ProjectID>" \
   --location="global" \
   --workload-identity-pool="github-actions-pool" \
   --display-name="GitHub Actions Provider" \
@@ -191,10 +191,10 @@ gcloud iam workload-identity-pools providers create-oidc "github-actions-provide
   --issuer-uri="https://token.actions.githubusercontent.com"
 
 # サービスアカウントへのバインディング
-gcloud iam service-accounts add-iam-policy-binding "githubactions@<PROJECT_ID>.iam.gserviceaccount.com" \
-  --project="<PROJECT_ID>" \
+gcloud iam service-accounts add-iam-policy-binding "githubactions@<ProjectID>.iam.gserviceaccount.com" \
+  --project="<ProjectID>" \
   --role="roles/iam.workloadIdentityUser" \
-  --member="principalSet://iam.googleapis.com/projects/<PROJECT_ID>/locations/global/workloadIdentityPools/github-actions-pool/attribute.repository/<github owner>/<github repo>"
+  --member="principalSet://iam.googleapis.com/projects/<ProjectID>/locations/global/workloadIdentityPools/github-actions-pool/attribute.repository/<github owner>/<github repo>"
 
 # GitHub Actionsに必要なシークレットの設定
 
@@ -210,12 +210,51 @@ gcloud iam service-accounts add-iam-policy-binding "githubactions@<PROJECT_ID>.i
 
 ## Vercel と Google Cloud の OIDC 認証
 
+```bash
+# サービスアカウントの作成
+$ gcloud iam service-accounts create vercel-service-account \
+  --display-name="Vercel Service Account"
+
+# サービスアカウントに必要なロールを付与
+$ gcloud projects add-iam-policy-binding <ProjectID> \
+  --member="serviceAccount:vercel-service-account@<ProjectID>.iam.gserviceaccount.com" \
+  --role="roles/run.invoker"
+
+# Workload Identity Poolの作成
+$ gcloud iam workload-identity-pools create "vercel-pool" \
+  --project="<ProjectID>" \
+  --location="global" \
+  --display-name="Vercel Pool"
+
+# Workload Identity Providerの作成
+$ gcloud iam workload-identity-pools providers create-oidc "vercel-provider" \
+  --project="<ProjectID>" \
+  --location="global" \
+  --workload-identity-pool="vercel-pool" \
+  --display-name="Vercel Provider" \
+  --attribute-mapping="google.subject=assertion.sub" \
+  --allowed-audiences="https://vercel.com/oga09s-projects" \
+  --issuer-uri="https://oidc.vercel.com"
+
+# サービスアカウントへのバインディング
+$ gcloud iam service-accounts add-iam-policy-binding "vercel-service-account@node-api-400701.iam.gserviceaccount.com" \
+  --project="node-api-400701" \
+  --role="roles/iam.workloadIdentityUser" \
+  --member="principal://iam.googleapis.com/projects/<Project Number>/locations/global/workloadIdentityPools/vercel-pool/subject/owner:oga09s-projects:project:graphql-typescript:environment:production"
+
+```
+
+![vercel oidc setting](./docs/image.png)
+
 ## 参考
 
-https://cloud.google.com/iam/docs/workload-identity-federation-with-deployment-pipelines?hl=ja#gcloud
+- GoogleCloud と GitHubActions を OIDC 認証する設定
+  https://cloud.google.com/iam/docs/workload-identity-federation-with-deployment-pipelines?hl=ja#gcloud
 
-https://vercel.com/docs/security/secure-backend-access/oidc/gcp
+- Vercel と GoogleCloud を OIDC 認証する設定
+  https://vercel.com/docs/security/secure-backend-access/oidc/gcp
 
-https://blog.p1ass.com/posts/vercel-cloud-run-iam/
+- Vercel で OIDC を行うプロジェクト設定
+  https://blog.p1ass.com/posts/vercel-cloud-run-iam/
 
 LICENSE @o-ga09
