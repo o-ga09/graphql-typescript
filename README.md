@@ -198,7 +198,32 @@ gcloud iam service-accounts add-iam-policy-binding "githubactions@<ProjectID>.ia
 
 # GitHub Actionsに必要なシークレットの設定
 
+`WORKLOAD_IDENTITY_PROVIDER`をシークレットに設定する。値は、`projects/プロジェクト番号/locations/global/workloadIdentityPools/Workload Identity プール ID/providers/Workload Identity プロバイダ ID`
+
+プロジェクト番号: プロジェクトトップのプロジェクウト番号
+Workload Identity プール ID:IAMと管理 >Workload Identity連携＞Pool
+Workload Identity プロバイダ ID:プール ID:IAMと管理 >Workload Identity連携＞Pool
+
+
 ```
+
+![キャプチャ](./docs/スクリーンショット%202025-01-15%2021.21.01.png)
+
+![キャプチャ](./docs/スクリーンショット%202025-01-15%2021.24.34.png)
+
+以下のGoogle APIを有効化する
+
+- Artifact Registryアップロード権限
+  - artifactregistry.googleapis.com
+
+- IAM権限API
+  - iamcredentials.googleapis.com
+
+- Cloud Run管理者API
+  - run.googleapis.com
+
+- Secrets Manager管理者 API
+  - secretmanager.googleapis.com
 
 ## Firebase Authetication を Firebase 以外のデプロイ先で使用する
 
@@ -207,44 +232,6 @@ gcloud iam service-accounts add-iam-policy-binding "githubactions@<ProjectID>.ia
 3. Authentication 設定に移動: 左側のメニューから「Authentication」を選択する
 4. 認証ドメインの追加: 「承認済みドメイン」セクションに移動し、Vercel で使用しているドメインを追加します。例えば、your-project.vercel.app のように追加します。
 5. 設定の保存: ドメインを追加したら、設定を保存します。
-
-## Vercel と Google Cloud の OIDC 認証
-
-```bash
-# サービスアカウントの作成
-$ gcloud iam service-accounts create vercel-service-account \
-  --display-name="Vercel Service Account"
-
-# サービスアカウントに必要なロールを付与
-$ gcloud projects add-iam-policy-binding <ProjectID> \
-  --member="serviceAccount:vercel-service-account@<ProjectID>.iam.gserviceaccount.com" \
-  --role="roles/run.invoker"
-
-# Workload Identity Poolの作成
-$ gcloud iam workload-identity-pools create "vercel-pool" \
-  --project="<ProjectID>" \
-  --location="global" \
-  --display-name="Vercel Pool"
-
-# Workload Identity Providerの作成
-$ gcloud iam workload-identity-pools providers create-oidc "vercel-provider" \
-  --project="<ProjectID>" \
-  --location="global" \
-  --workload-identity-pool="vercel-pool" \
-  --display-name="Vercel Provider" \
-  --attribute-mapping="google.subject=assertion.sub" \
-  --allowed-audiences="https://vercel.com/oga09s-projects" \
-  --issuer-uri="https://oidc.vercel.com"
-
-# サービスアカウントへのバインディング
-$ gcloud iam service-accounts add-iam-policy-binding "vercel-service-account@node-api-400701.iam.gserviceaccount.com" \
-  --project="node-api-400701" \
-  --role="roles/iam.workloadIdentityUser" \
-  --member="principal://iam.googleapis.com/projects/<Project Number>/locations/global/workloadIdentityPools/vercel-pool/subject/owner:oga09s-projects:project:graphql-typescript:environment:production"
-
-```
-
-![vercel oidc setting](./docs/image.png)
 
 ## 参考
 
